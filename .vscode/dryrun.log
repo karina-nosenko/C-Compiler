@@ -1,0 +1,7 @@
+make.exe --dry-run --always-make --keep-going --print-directory
+make.exe: Entering directory `c:/Users/karina/OneDrive/Desktop/Shenkar/3year2sem/Compilation/Compiler/Test1 - Copy'
+bison -d parser.y
+flex scanner.l
+gcc lex.yy.c parser.tab.c -o interpreter.exe
+make.exe: Leaving directory `c:/Users/karina/OneDrive/Desktop/Shenkar/3year2sem/Compilation/Compiler/Test1 - Copy'
+ 
