@@ -649,12 +649,12 @@ YY_RULE_SETUP
 case 7:
 YY_RULE_SETUP
 #line 14 "scanner.l"
-{ yylval.id = yytext[0]; return IDENTIFIER; }
+{ return IDENTIFIER; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
 #line 15 "scanner.l"
-{ yylval.num = atoi(yytext); return NUMBER; }
+{ return NUMBER; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP

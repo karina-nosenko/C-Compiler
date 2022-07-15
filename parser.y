@@ -1,82 +1,83 @@
 %{
-    void yyerror(char* s);
-    int yylex();
-
     #include <stdio.h>
     #include <stdlib.h>
     #include <ctype.h>
+    #include <string.h>
+    #include <stdbool.h>
 
-    int tcounter = 0, ecounter = 0;
+    #define VARNAME_LEN 20
+    #define TYPE_LEN 10
+    #define LABEL_LEN 200
+    #define TABLE_SIZE 10000
+    #define STACK_SIZE 1000
+
+    void yyerror(char* s);
+    int yylex();
+    void setType();
+    bool isVarDeclared(char variableName[VARNAME_LEN]);
+    void assertVarDeclared();
+    void declare();
+    void push();
+
+    extern char *yytext;
 %}
 
-%union { int num; char id; }
 %start program
 %token BEGIN_KWD END INT ARR
-%token <num> NUMBER
-%token <id> IDENTIFIER
-%type <id> block
-%type <num> statement_list statement declarator expression term
-%type <num> int_assignment_list arr_assignment_list int_assignment arr_assignment
-
+%token NUMBER
+%token IDENTIFIER
 
 %%
 program             : { printf("#include <stdio.h>\n#include <stdlib.h>\nint main() {\n"); }  block   { printf("}"); return 0; }
 
-block               : BEGIN_KWD { printf("{\n"); } statement_list END { ecounter = tcounter = 0; printf("}\n"); }
+block               : BEGIN_KWD { printf("{\n"); } statement_list END { printf("}\n"); }
 
-statement_list      : /* empty */                               { }
-                    | statement_list statement                  { }
+statement_list      : /* empty */                               
+                    | statement_list statement                  
                     ;       
 
-statement           : declarator ';'                            { }                 
-                    | int_assignment ';'                        { }   
-                    | arr_assignment ';'                        { }               
+statement           : declarator ';'                                        
+                    | assignment_list ';'                                       
                     ;       
 
-declarator          : INT int_assignment_list                   { }
-                    | ARR arr_assignment_list                   { }
+declarator          : type { setType(); } IDENTIFIER { declare(); } variable_list
+
+variable_list       : /* empty */  
+                    | ',' IDENTIFIER { declare(); } variable_list
                     ;
 
-int_assignment_list : int_assignment                            { }
-                    | int_assignment_list ',' int_assignment    { }
+assignment_list     : assignment                                
+                    | assignment_list ',' assignment            
                     ;
 
-arr_assignment_list : arr_assignment                            { }
-                    | arr_assignment_list ',' arr_assignment    { }
-                    ;
+assignment          : IDENTIFIER { push(); } '=' { push(); } expression
+                    ;                
 
-int_assignment      : IDENTIFIER '=' expression                 { printf("int %c = e%d;\n", $1, $3); }
-                    | IDENTIFIER                                { printf("int %c;\n", $1); }
-                    ;           
-
-arr_assignment      : IDENTIFIER '=' expression                 { printf("int* %c = (int*)malloc(sizeof(int)*256);\n%c[0] = e%d;\n", $1, $1, $3); }
-                    | IDENTIFIER                                { printf("int* %c;\n", $1); }
+expression          : expression '+' { push(); } expression                       
+                    | expression '-' { push(); } expression                       
+                    | expression '*' { push(); } expression                       
+                    | expression '/' { push(); } expression
+                    | IDENTIFIER { assertVarDeclared(); push(); }
+                    | NUMBER { push(); }
                     ;       
 
-expression          : term                                      { $$ = ++ecounter; printf("int e%d = t%d;\n", ecounter, $1); }
-                    | expression '+' term                       { $$ = ++ecounter; printf("int e%d = e%d + t%d;\n", ecounter, $1, $3); }
-                    | expression '-' term                       { $$ = ++ecounter; printf("int e%d = e%d - t%d;\n", ecounter, $1, $3); }
-                    | expression '*' term                       { $$ = ++ecounter; printf("int e%d = e%d - t%d;\n", ecounter, $1, $3); }
-                    | expression '/' term                       { $$ = ++ecounter; printf("int e%d = e%d - t%d;\n", ecounter, $1, $3); }
-                    ;       
-
-term                : NUMBER                                    { $$ = ++tcounter; printf("int t%d = %d;\n", tcounter, $1); }
-                    | IDENTIFIER                                { $$ = ++tcounter; printf("int e%d = %d;\n", tcounter, $1); }
+type                : INT                                       
+                    | ARR
                     ;
-
 %%
-char st[1000][10];
-int top=0;
-int i=0;
 char temp[2]="t";
-int label[200];
+int label[LABEL_LEN];
 
 struct Table
 {
-	char id[20];
-	char type[10];
-} table[10000];
+	char id[VARNAME_LEN];
+	char type[TYPE_LEN];
+} table[TABLE_SIZE];
+int tableCurrentIndex = 0;
+char type[TYPE_LEN];
 
+char st[STACK_SIZE][10];
+int top=0;
 
 int main(void) {
     return yyparse();
@@ -84,4 +85,49 @@ int main(void) {
 
 void yyerror(char *s) {
 	fprintf(stderr, "error: %s\n", s);
+}
+
+/* SYMBOL TABLE */
+
+void setType() {
+	strcpy(type,yytext);
+}
+
+bool isVarDeclared(char variableName[VARNAME_LEN]) {
+    for(int i=0; i<tableCurrentIndex; i++) {
+        if (strcmp(table[i].id, variableName) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void assertVarDeclared() {
+    char variableName[VARNAME_LEN];
+    strcpy(variableName, yytext);
+
+    if(!isVarDeclared(variableName)) {
+        yyerror("Variable not declared.");
+		exit(0);
+    }
+}
+
+void declare() {
+    char variableName[VARNAME_LEN];
+    strcpy(variableName, yytext);
+
+    if(isVarDeclared(variableName)) {
+        yyerror("Multiple variable name declaration.");
+        exit(0);
+    }
+
+    strcpy(table[tableCurrentIndex].id, variableName);
+    strcpy(table[tableCurrentIndex].type, type);
+    tableCurrentIndex++;
+}
+
+/* STACK */
+
+void push() {
+    strcpy(st[++top], yytext);
 }

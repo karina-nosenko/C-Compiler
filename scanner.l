@@ -9,10 +9,10 @@ int yylex();
 "end"                       { return END; }
 "int"                       { return INT; }
 "arr"                       { return ARR; }
-[;=,]                        { return yytext[0]; }
+[;=,]                       { return yytext[0]; }
 [+\-\*/]                    { return yytext[0]; }
-[_a-zA-Z][_a-zA-Z0-9]*      { yylval.id = yytext[0]; return IDENTIFIER; }
-[-+1-9][0-9]*               { yylval.num = atoi(yytext); return NUMBER; }
+[_a-zA-Z][_a-zA-Z0-9]*      { return IDENTIFIER; }
+[-+1-9][0-9]*               { return NUMBER; }
 [ \t\n]                     { ; }
 .                           { printf("unexpected character\n"); }
 
