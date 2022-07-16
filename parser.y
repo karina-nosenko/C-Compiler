@@ -21,6 +21,7 @@
     void codegen_declare();
     void codegen_assign();
     void codegen_arithmetic();
+    void codegen_relop();
     void codegen_free();
 
     extern char *yytext;
@@ -30,6 +31,12 @@
 %token BEGIN_KWD END INT ARR
 %token NUMBER
 %token IDENTIFIER
+%token LE GE EQ NE GT LT
+%right '=' 
+%left EQ NE 
+%left LE GE LT GT
+%left '+' '-' 
+%left '*' '/' '@'
 
 %%
 program             : { printf("#include <stdio.h>\n#include <stdlib.h>\n\nint main()\n"); }  block   { return 0; }
@@ -61,6 +68,13 @@ expression          : expression '+' { push(); } expression { codegen_arithmetic
                     | expression '-' { push(); } expression { codegen_arithmetic(); }                       
                     | expression '*' { push(); } expression { codegen_arithmetic(); }                       
                     | expression '/' { push(); } expression { codegen_arithmetic(); }
+                    | expression LT { push(); } expression { codegen_relop(); }
+                    | expression LE { push(); } expression { codegen_relop(); }
+                    | expression GT { push(); } expression { codegen_relop(); }
+                    | expression GE { push(); } expression { codegen_relop(); }
+                    | expression NE { push(); } expression { codegen_relop(); }
+                    | expression EQ { push(); } expression { codegen_relop(); }
+                    | '(' expression ')'
                     | IDENTIFIER { assertVarDeclared(); push(); }
                     | NUMBER { push(); }
                     ;       
@@ -160,6 +174,13 @@ void codegen_assign() {
 void codegen_arithmetic() {
     sprintf(temp, "t%d", i++);
     printf("\tint %s = %s %s %s;\n", temp, st[top-2], st[top-1], st[top]);   // t1 = 5 + 4
+    top -=2;
+    strcpy(st[top], temp);
+}
+
+void codegen_relop() {
+    sprintf(temp, "t%d", i++);
+    printf("\tint %s = %s %s %s;\n", temp, st[top-2], st[top-1], st[top]);   // t1 = 5 < 4
     top -=2;
     strcpy(st[top], temp);
 }
