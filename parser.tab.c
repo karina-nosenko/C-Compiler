@@ -76,9 +76,8 @@
     #include <string.h>
     #include <stdbool.h>
 
-    #define VARNAME_LEN 20
-    #define TYPE_LEN 10
-    #define LABEL_LEN 200
+    #define TYPE_LEN 4
+    #define LABEL_LEN 100
     #define TOKEN_LEN 100
     #define TABLE_SIZE 10000
     #define STACK_SIZE 1000
@@ -86,12 +85,13 @@
 
     void yyerror(char* s);
     int yylex();
+    void addSymbolToTable(char id[TOKEN_LEN], char type[TYPE_LEN], int arr_size);
     void setType();
     bool isInteger(char token[TOKEN_LEN]);
     bool isArray(char token[TOKEN_LEN]);
     enum token_type getType(char token[TOKEN_LEN]);
-    struct Table* findVar(char variableName[VARNAME_LEN]);
-    bool isVarDeclared(char variableName[VARNAME_LEN]);
+    struct Table* findVar(char variableName[TOKEN_LEN]);
+    bool isVarDeclared(char variableName[TOKEN_LEN]);
     void assertVarDeclared();
     void declare();
     void push();
@@ -1850,7 +1850,7 @@ int label[LABEL_LEN];
 
 struct Table
 {
-	char id[VARNAME_LEN];
+	char id[TOKEN_LEN];
 	char type[TYPE_LEN];
     int arr_size;   // size of the array if the type is arr
 } table[TABLE_SIZE];
@@ -1861,7 +1861,7 @@ char st[STACK_SIZE][TOKEN_LEN];
 int top=0;
 
 // for temporary variable names
-char temp[2]="t";
+char temp[TOKEN_LEN]="t";
 int i = 0;
 
 int main(void) {
@@ -1873,6 +1873,13 @@ void yyerror(char *s) {
 }
 
 /* SYMBOL TABLE */
+
+void addSymbolToTable(char id[TOKEN_LEN], char type[TYPE_LEN], int arr_size) {
+    strcpy(table[tableCurrentIndex].id, id);
+    strcpy(table[tableCurrentIndex].type, type);
+    table[tableCurrentIndex].arr_size = arr_size;
+    tableCurrentIndex++;
+}
 
 void setType() {
 	strcpy(type,yytext);
@@ -1915,7 +1922,7 @@ enum token_type getType(char token[TOKEN_LEN]) {
     }
 }
 
-struct Table* findVar(char variableName[VARNAME_LEN]) {
+struct Table* findVar(char variableName[TOKEN_LEN]) {
     for(int i=0; i<tableCurrentIndex; i++) {
         if (strcmp(table[i].id, variableName) == 0) {
             return &table[i];
@@ -1924,7 +1931,7 @@ struct Table* findVar(char variableName[VARNAME_LEN]) {
     return NULL;
 }
 
-bool isVarDeclared(char variableName[VARNAME_LEN]) {
+bool isVarDeclared(char variableName[TOKEN_LEN]) {
     for(int i=0; i<tableCurrentIndex; i++) {
         if (strcmp(table[i].id, variableName) == 0) {
             return true;
@@ -1941,7 +1948,7 @@ void assertVarDeclared() {
 }
 
 void declare() {
-    char variableName[VARNAME_LEN];
+    char variableName[TOKEN_LEN];
     strcpy(variableName, yytext);
 
     if (isVarDeclared(variableName)) {
@@ -1949,14 +1956,7 @@ void declare() {
         exit(0);
     }
 
-    strcpy(table[tableCurrentIndex].id, variableName);
-    strcpy(table[tableCurrentIndex].type, type);
-
-    if (strcmp(type, "arr") == 0) {
-        table[tableCurrentIndex].arr_size = 0;
-    }
-
-    tableCurrentIndex++;
+    addSymbolToTable(variableName, type, 0);
 }
 
 /* STACK */
@@ -1986,8 +1986,15 @@ void codegen_arithmetic() {
     enum token_type rightType = getType(st[top]);
 
     if (leftType == rightType == INTEGER) {
+        addSymbolToTable(temp, "int", 0);
         printf("\tint %s = %s %s %s;\n", temp, st[top-2], st[top-1], st[top]);   // int t1 = 5 + 4
-    } else if (leftType == rightType == ARRAY) {
+    } else if (leftType == rightType == ARRAY) { 
+        int biggestSize = 0;
+
+        // define the biggest size of both arrays
+
+        addSymbolToTable(temp, "arr", biggestSize);
+
         // TODO
     } else {
         yyerror("Incompatible data types.");
@@ -2004,9 +2011,10 @@ void codegen_relop() {
     enum token_type rightType = getType(st[top]);
 
     if (leftType == rightType == INTEGER) {
+        strcpy(table[tableCurrentIndex].id, temp);
+        strcpy(table[tableCurrentIndex].type, "int");
+
         printf("\tint %s = %s %s %s;\n", temp, st[top-2], st[top-1], st[top]);   // int t1 = 5 < 4
-    } else if (leftType == rightType == ARRAY) {
-        // TODO
     } else {
         yyerror("Incompatible data types.");
         exit(0);
