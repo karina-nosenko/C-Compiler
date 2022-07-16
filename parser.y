@@ -17,7 +17,8 @@
     void addSymbolToTable(char id[TOKEN_LEN], char type[TYPE_LEN], int arr_size);
     void setType();
     bool isInteger(char token[TOKEN_LEN]);
-    bool isArray(char token[TOKEN_LEN]);
+    bool isConstArray(char token[TOKEN_LEN]);
+    int getConstArrSize(char array[TOKEN_LEN]);
     enum token_type getType(char token[TOKEN_LEN]);
     struct Table* findVar(char variableName[TOKEN_LEN]);
     bool isVarDeclared(char variableName[TOKEN_LEN]);
@@ -37,6 +38,7 @@
 %token BEGIN_KWD END INT ARR
 %token NUMBER
 %token IDENTIFIER
+%token CONST_ARR
 %token LE GE EQ NE GT LT
 %right '=' 
 %left EQ NE 
@@ -83,6 +85,7 @@ expression          : expression '+' { push(); } expression { codegen_arithmetic
                     | '(' expression ')'
                     | IDENTIFIER { assertVarDeclared(); push(); }
                     | NUMBER { push(); }
+                    | CONST_ARR { push(); }
                     ;       
 
 type                : INT                                       
@@ -105,7 +108,7 @@ int top=0;
 
 // for temporary variable names
 char temp[TOKEN_LEN]="t";
-int i = 0;
+int token_index = 0;
 
 int main(void) {
     return yyparse();
@@ -137,29 +140,52 @@ bool isInteger(char token[TOKEN_LEN]) {
     return true;
 }
 
-bool isArray(char token[TOKEN_LEN]) {
+bool isConstArray(char token[TOKEN_LEN]) {
     int size = 0;
     for(int i=0; i<TOKEN_LEN && token[i] != '\0'; i++) {
         size++;
     }
 
-    if (token[0] == '[' && token[size] == ']') {
+    if (token[0] == '[' && token[size-1] == ']') {
         return true;
     }
     return false;
 }
 
+int getConstArrSize(char array[TOKEN_LEN]) {
+    bool empty = true;
+    bool oneElement = true;
+    int numOfCommas = 0;
+    for(int i=1; i<TOKEN_LEN && array[i]!='\0' && array[i]!=']'; i++) {
+        if (isdigit(array[i])) {
+            empty = false;
+        }
+        if (array[i] == ',') {
+            oneElement = false;
+            numOfCommas++;
+        }
+    }
+
+    if (empty) {
+        return 0;
+    } else if (oneElement) {
+        return 1;
+    } else {
+        return numOfCommas + 1;
+    }
+}
+
 enum token_type getType(char token[TOKEN_LEN]) {
     if (isInteger(token)) {
         return INTEGER;
-    } else if (isArray(token)) {
+    } else if (isConstArray(token)) {
         return ARRAY;
     } else {
         struct Table* variable = findVar(token);
         if(variable) {
             return strcmp(variable->type, "arr") == 0 ? ARRAY : INTEGER;
         } else {
-            yyerror("Variable not declared");
+            yyerror("Unknown type.");
 		    exit(0);
         }
     }
@@ -224,21 +250,41 @@ void codegen_assign() {
 }
 
 void codegen_arithmetic() {
-    sprintf(temp, "t%d", i++);
-    enum token_type leftType = getType(st[top-2]);
-    enum token_type rightType = getType(st[top]);
+    sprintf(temp, "t%d", token_index++);
+
+    char left[TOKEN_LEN];
+    char right[TOKEN_LEN];
+    char operator[5];
+    strcpy(left, st[top-2]);
+    strcpy(right, st[top]);
+    strcpy(operator, st[top-1]);
+
+    enum token_type leftType = getType(left);
+    enum token_type rightType = getType(right);
 
     if (leftType == rightType == INTEGER) {
         addSymbolToTable(temp, "int", 0);
-        printf("\tint %s = %s %s %s;\n", temp, st[top-2], st[top-1], st[top]);   // int t1 = 5 + 4
+        printf("\tint %s = %s %s %s;\n", temp, left, operator, right);   // int t1 = 5 + 4
     } else if (leftType == rightType == ARRAY) { 
-        int biggestSize = 0;
+        int resultSize = 0;
+        int leftSize = 0, rightSize = 0;
 
-        // define the biggest size of both arrays
+        leftSize = isConstArray(left) ? getConstArrSize(left) : findVar(left)->arr_size;
+        rightSize = isConstArray(right) ? getConstArrSize(right) : findVar(right)->arr_size;
+        resultSize = leftSize > rightSize ? leftSize : rightSize;
 
-        addSymbolToTable(temp, "arr", biggestSize);
+        addSymbolToTable(temp, "arr", resultSize);
 
-        // TODO
+        // i need to add here assignments of the t to things...
+        if (leftSize > rightSize) {
+            printf("\t%s = (int*)calloc(%d, sizeof(int));\n", right, resultSize);
+        } else if (leftSize < rightSize) {
+            printf("\t%s = (int*)calloc(%d, sizeof(int));\n", left, resultSize);
+        }
+
+        printf("\tint* %s = (int*)malloc(sizeof(int) * %d);\n", temp, resultSize);
+        printf("\tfor(int i=0; i<%d; i++) {\n", resultSize);
+        printf("\t\t%s[i] = %s[i] %s %s[i];\n\t}\n", temp, left, operator, right);
     } else {
         yyerror("Incompatible data types.");
         exit(0);
@@ -249,7 +295,7 @@ void codegen_arithmetic() {
 }
 
 void codegen_relop() {
-    sprintf(temp, "t%d", i++);
+    sprintf(temp, "t%d", token_index++);
     enum token_type leftType = getType(st[top-2]);
     enum token_type rightType = getType(st[top]);
 

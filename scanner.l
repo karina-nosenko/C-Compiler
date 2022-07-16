@@ -15,6 +15,7 @@ int yylex();
 "!="                        { return NE; }
 ">"	                        { return GT; }
 "<"	                        { return LT; }
+\[\]|\[[0-9](,[0-9]+)*\]    { return CONST_ARR; }
 [;=,]                       { return yytext[0]; }
 [+\-\*/()]                  { return yytext[0]; }
 [_a-zA-Z][_a-zA-Z0-9]*      { return IDENTIFIER; }
