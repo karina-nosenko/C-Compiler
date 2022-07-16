@@ -75,7 +75,7 @@ struct Table
 {
 	char id[VARNAME_LEN];
 	char type[TYPE_LEN];
-    int arr_size;   // represents the size of the array if the type is arr
+    int arr_size;   // size of the array if the type is arr
 } table[TABLE_SIZE];
 int tableCurrentIndex = 0;
 char type[TYPE_LEN];
