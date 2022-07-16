@@ -89,12 +89,16 @@
     void assertVarDeclared();
     void declare();
     void push();
+    void codegen_declare();
+    void codegen_assign();
+    void codegen_arithmetic();
+    void codegen_free();
 
     extern char *yytext;
 
 
 /* Line 189 of yacc.c  */
-#line 98 "parser.tab.c"
+#line 102 "parser.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -144,7 +148,7 @@ typedef int YYSTYPE;
 
 
 /* Line 264 of yacc.c  */
-#line 148 "parser.tab.c"
+#line 152 "parser.tab.c"
 
 #ifdef short
 # undef short
@@ -437,10 +441,10 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    31,    31,    31,    33,    33,    35,    36,    39,    40,
-      43,    43,    43,    45,    46,    46,    49,    50,    53,    53,
-      53,    56,    56,    57,    57,    58,    58,    59,    59,    60,
-      61,    64,    65
+       0,    35,    35,    35,    37,    37,    39,    40,    43,    44,
+      47,    47,    47,    49,    50,    50,    53,    54,    57,    57,
+      57,    60,    60,    61,    61,    62,    62,    63,    63,    64,
+      65,    68,    69
 };
 #endif
 
@@ -1367,112 +1371,147 @@ yyreduce:
         case 2:
 
 /* Line 1455 of yacc.c  */
-#line 31 "parser.y"
-    { printf("#include <stdio.h>\n#include <stdlib.h>\nint main() {\n"); ;}
+#line 35 "parser.y"
+    { printf("#include <stdio.h>\n#include <stdlib.h>\n\nint main()\n"); ;}
     break;
 
   case 3:
 
 /* Line 1455 of yacc.c  */
-#line 31 "parser.y"
-    { printf("}"); return 0; ;}
+#line 35 "parser.y"
+    { return 0; ;}
     break;
 
   case 4:
 
 /* Line 1455 of yacc.c  */
-#line 33 "parser.y"
+#line 37 "parser.y"
     { printf("{\n"); ;}
     break;
 
   case 5:
 
 /* Line 1455 of yacc.c  */
-#line 33 "parser.y"
-    { printf("}\n"); ;}
+#line 37 "parser.y"
+    { codegen_free(); printf("}\n"); ;}
     break;
 
   case 10:
 
 /* Line 1455 of yacc.c  */
-#line 43 "parser.y"
+#line 47 "parser.y"
     { setType(); ;}
     break;
 
   case 11:
 
 /* Line 1455 of yacc.c  */
-#line 43 "parser.y"
-    { declare(); ;}
+#line 47 "parser.y"
+    { declare(); push(); codegen_declare(); ;}
     break;
 
   case 14:
 
 /* Line 1455 of yacc.c  */
-#line 46 "parser.y"
-    { declare(); ;}
+#line 50 "parser.y"
+    { declare(); push(); codegen_declare(); ;}
     break;
 
   case 18:
 
 /* Line 1455 of yacc.c  */
-#line 53 "parser.y"
-    { push(); ;}
+#line 57 "parser.y"
+    { assertVarDeclared(); push(); ;}
     break;
 
   case 19:
-
-/* Line 1455 of yacc.c  */
-#line 53 "parser.y"
-    { push(); ;}
-    break;
-
-  case 21:
-
-/* Line 1455 of yacc.c  */
-#line 56 "parser.y"
-    { push(); ;}
-    break;
-
-  case 23:
 
 /* Line 1455 of yacc.c  */
 #line 57 "parser.y"
     { push(); ;}
     break;
 
-  case 25:
+  case 20:
 
 /* Line 1455 of yacc.c  */
-#line 58 "parser.y"
-    { push(); ;}
+#line 57 "parser.y"
+    { codegen_assign(); ;}
     break;
 
-  case 27:
-
-/* Line 1455 of yacc.c  */
-#line 59 "parser.y"
-    { push(); ;}
-    break;
-
-  case 29:
+  case 21:
 
 /* Line 1455 of yacc.c  */
 #line 60 "parser.y"
-    { assertVarDeclared(); push(); ;}
+    { push(); ;}
     break;
 
-  case 30:
+  case 22:
+
+/* Line 1455 of yacc.c  */
+#line 60 "parser.y"
+    { codegen_arithmetic(); ;}
+    break;
+
+  case 23:
 
 /* Line 1455 of yacc.c  */
 #line 61 "parser.y"
     { push(); ;}
     break;
 
+  case 24:
+
+/* Line 1455 of yacc.c  */
+#line 61 "parser.y"
+    { codegen_arithmetic(); ;}
+    break;
+
+  case 25:
+
+/* Line 1455 of yacc.c  */
+#line 62 "parser.y"
+    { push(); ;}
+    break;
+
+  case 26:
+
+/* Line 1455 of yacc.c  */
+#line 62 "parser.y"
+    { codegen_arithmetic(); ;}
+    break;
+
+  case 27:
+
+/* Line 1455 of yacc.c  */
+#line 63 "parser.y"
+    { push(); ;}
+    break;
+
+  case 28:
+
+/* Line 1455 of yacc.c  */
+#line 63 "parser.y"
+    { codegen_arithmetic(); ;}
+    break;
+
+  case 29:
+
+/* Line 1455 of yacc.c  */
+#line 64 "parser.y"
+    { assertVarDeclared(); push(); ;}
+    break;
+
+  case 30:
+
+/* Line 1455 of yacc.c  */
+#line 65 "parser.y"
+    { push(); ;}
+    break;
+
 
 
 /* Line 1455 of yacc.c  */
-#line 1476 "parser.tab.c"
+#line 1515 "parser.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1684,21 +1723,25 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 67 "parser.y"
+#line 71 "parser.y"
 
-char temp[2]="t";
 int label[LABEL_LEN];
 
 struct Table
 {
 	char id[VARNAME_LEN];
 	char type[TYPE_LEN];
+    int arr_size;   // represents the size of the array if the type is arr
 } table[TABLE_SIZE];
 int tableCurrentIndex = 0;
 char type[TYPE_LEN];
 
 char st[STACK_SIZE][10];
 int top=0;
+
+// for temporary variable names
+char temp[2]="t";
+int i = 0;
 
 int main(void) {
     return yyparse();
@@ -1724,11 +1767,8 @@ bool isVarDeclared(char variableName[VARNAME_LEN]) {
 }
 
 void assertVarDeclared() {
-    char variableName[VARNAME_LEN];
-    strcpy(variableName, yytext);
-
-    if(!isVarDeclared(variableName)) {
-        yyerror("Variable not declared.");
+    if(!isVarDeclared(yytext)) {
+        yyerror("Variable not declared");
 		exit(0);
     }
 }
@@ -1737,13 +1777,18 @@ void declare() {
     char variableName[VARNAME_LEN];
     strcpy(variableName, yytext);
 
-    if(isVarDeclared(variableName)) {
-        yyerror("Multiple variable name declaration.");
+    if (isVarDeclared(variableName)) {
+        yyerror("Multiple variable name declarations");
         exit(0);
     }
 
     strcpy(table[tableCurrentIndex].id, variableName);
     strcpy(table[tableCurrentIndex].type, type);
+
+    if (strcmp(type, "arr") == 0) {
+        table[tableCurrentIndex].arr_size = 0;
+    }
+
     tableCurrentIndex++;
 }
 
@@ -1751,4 +1796,34 @@ void declare() {
 
 void push() {
     strcpy(st[++top], yytext);
+}
+
+/* CODE GENERATORS */
+
+void codegen_declare() {
+    if (strcmp(type, "arr") == 0) {
+        printf("\tint* %s;\n", st[top--]);  // arr x;
+    } else {
+        printf("\tint %s;\n", st[top--]);  // int x;
+    }
+}
+
+void codegen_assign() {
+    printf("\t%s = %s;\n", st[top-2], st[top]);    // x = 5;
+    top -= 3;
+}
+
+void codegen_arithmetic() {
+    sprintf(temp, "t%d", i++);
+    printf("\tint %s = %s %s %s;\n", temp, st[top-2], st[top-1], st[top]);   // t1 = 5 + 4
+    top -=2;
+    strcpy(st[top], temp);
+}
+
+void codegen_free() {
+    for(int i=0; i<tableCurrentIndex; i++) {
+        if (strcmp(table[i].type, "arr")==0 && table[i].arr_size > 0) {
+            printf("\tfree(%s);\n", table[i].id);   // free(x)
+        }
+    }
 }

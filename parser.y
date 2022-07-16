@@ -18,6 +18,10 @@
     void assertVarDeclared();
     void declare();
     void push();
+    void codegen_declare();
+    void codegen_assign();
+    void codegen_arithmetic();
+    void codegen_free();
 
     extern char *yytext;
 %}
@@ -28,9 +32,9 @@
 %token IDENTIFIER
 
 %%
-program             : { printf("#include <stdio.h>\n#include <stdlib.h>\nint main() {\n"); }  block   { printf("}"); return 0; }
+program             : { printf("#include <stdio.h>\n#include <stdlib.h>\n\nint main()\n"); }  block   { return 0; }
 
-block               : BEGIN_KWD { printf("{\n"); } statement_list END { printf("}\n"); }
+block               : BEGIN_KWD { printf("{\n"); } statement_list END { codegen_free(); printf("}\n"); }
 
 statement_list      : /* empty */                               
                     | statement_list statement                  
@@ -40,23 +44,23 @@ statement           : declarator ';'
                     | assignment_list ';'                                       
                     ;       
 
-declarator          : type { setType(); } IDENTIFIER { declare(); } variable_list
+declarator          : type { setType(); } IDENTIFIER { declare(); push(); codegen_declare(); } variable_list
 
 variable_list       : /* empty */  
-                    | ',' IDENTIFIER { declare(); } variable_list
+                    | ',' IDENTIFIER { declare(); push(); codegen_declare(); } variable_list
                     ;
 
 assignment_list     : assignment                                
                     | assignment_list ',' assignment            
                     ;
 
-assignment          : IDENTIFIER { push(); } '=' { push(); } expression
+assignment          : IDENTIFIER { assertVarDeclared(); push(); } '=' { push(); } expression { codegen_assign(); }
                     ;                
 
-expression          : expression '+' { push(); } expression                       
-                    | expression '-' { push(); } expression                       
-                    | expression '*' { push(); } expression                       
-                    | expression '/' { push(); } expression
+expression          : expression '+' { push(); } expression { codegen_arithmetic(); }                        
+                    | expression '-' { push(); } expression { codegen_arithmetic(); }                       
+                    | expression '*' { push(); } expression { codegen_arithmetic(); }                       
+                    | expression '/' { push(); } expression { codegen_arithmetic(); }
                     | IDENTIFIER { assertVarDeclared(); push(); }
                     | NUMBER { push(); }
                     ;       
@@ -65,19 +69,23 @@ type                : INT
                     | ARR
                     ;
 %%
-char temp[2]="t";
 int label[LABEL_LEN];
 
 struct Table
 {
 	char id[VARNAME_LEN];
 	char type[TYPE_LEN];
+    int arr_size;   // represents the size of the array if the type is arr
 } table[TABLE_SIZE];
 int tableCurrentIndex = 0;
 char type[TYPE_LEN];
 
 char st[STACK_SIZE][10];
 int top=0;
+
+// for temporary variable names
+char temp[2]="t";
+int i = 0;
 
 int main(void) {
     return yyparse();
@@ -103,11 +111,8 @@ bool isVarDeclared(char variableName[VARNAME_LEN]) {
 }
 
 void assertVarDeclared() {
-    char variableName[VARNAME_LEN];
-    strcpy(variableName, yytext);
-
-    if(!isVarDeclared(variableName)) {
-        yyerror("Variable not declared.");
+    if(!isVarDeclared(yytext)) {
+        yyerror("Variable not declared");
 		exit(0);
     }
 }
@@ -116,13 +121,18 @@ void declare() {
     char variableName[VARNAME_LEN];
     strcpy(variableName, yytext);
 
-    if(isVarDeclared(variableName)) {
-        yyerror("Multiple variable name declaration.");
+    if (isVarDeclared(variableName)) {
+        yyerror("Multiple variable name declarations");
         exit(0);
     }
 
     strcpy(table[tableCurrentIndex].id, variableName);
     strcpy(table[tableCurrentIndex].type, type);
+
+    if (strcmp(type, "arr") == 0) {
+        table[tableCurrentIndex].arr_size = 0;
+    }
+
     tableCurrentIndex++;
 }
 
@@ -130,4 +140,34 @@ void declare() {
 
 void push() {
     strcpy(st[++top], yytext);
+}
+
+/* CODE GENERATORS */
+
+void codegen_declare() {
+    if (strcmp(type, "arr") == 0) {
+        printf("\tint* %s;\n", st[top--]);  // arr x;
+    } else {
+        printf("\tint %s;\n", st[top--]);  // int x;
+    }
+}
+
+void codegen_assign() {
+    printf("\t%s = %s;\n", st[top-2], st[top]);    // x = 5;
+    top -= 3;
+}
+
+void codegen_arithmetic() {
+    sprintf(temp, "t%d", i++);
+    printf("\tint %s = %s %s %s;\n", temp, st[top-2], st[top-1], st[top]);   // t1 = 5 + 4
+    top -=2;
+    strcpy(st[top], temp);
+}
+
+void codegen_free() {
+    for(int i=0; i<tableCurrentIndex; i++) {
+        if (strcmp(table[i].type, "arr")==0 && table[i].arr_size > 0) {
+            printf("\tfree(%s);\n", table[i].id);   // free(x)
+        }
+    }
 }
