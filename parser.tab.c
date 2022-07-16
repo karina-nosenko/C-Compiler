@@ -79,6 +79,7 @@
     #define VARNAME_LEN 20
     #define TYPE_LEN 10
     #define LABEL_LEN 200
+    #define TOKEN_LEN 100
     #define TABLE_SIZE 10000
     #define STACK_SIZE 1000
     enum token_type { INTEGER, ARRAY };
@@ -86,9 +87,9 @@
     void yyerror(char* s);
     int yylex();
     void setType();
-    bool isInteger(char token[10]);
-    bool isArray(char token[10]);
-    enum token_type getType(char token[10]);
+    bool isInteger(char token[TOKEN_LEN]);
+    bool isArray(char token[TOKEN_LEN]);
+    enum token_type getType(char token[TOKEN_LEN]);
     struct Table* findVar(char variableName[VARNAME_LEN]);
     bool isVarDeclared(char variableName[VARNAME_LEN]);
     void assertVarDeclared();
@@ -104,7 +105,7 @@
 
 
 /* Line 189 of yacc.c  */
-#line 108 "parser.tab.c"
+#line 109 "parser.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -160,7 +161,7 @@ typedef int YYSTYPE;
 
 
 /* Line 264 of yacc.c  */
-#line 164 "parser.tab.c"
+#line 165 "parser.tab.c"
 
 #ifdef short
 # undef short
@@ -458,11 +459,11 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    47,    47,    47,    49,    49,    51,    52,    55,    56,
-      59,    59,    59,    61,    62,    62,    65,    66,    69,    69,
-      69,    72,    72,    73,    73,    74,    74,    75,    75,    76,
-      76,    77,    77,    78,    78,    79,    79,    80,    80,    81,
-      81,    82,    83,    84,    87,    88
+       0,    48,    48,    48,    50,    50,    52,    53,    56,    57,
+      60,    60,    60,    62,    63,    63,    66,    67,    70,    70,
+      70,    73,    73,    74,    74,    75,    75,    76,    76,    77,
+      77,    78,    78,    79,    79,    80,    80,    81,    81,    82,
+      82,    83,    84,    85,    88,    89
 };
 #endif
 
@@ -1407,231 +1408,231 @@ yyreduce:
         case 2:
 
 /* Line 1455 of yacc.c  */
-#line 47 "parser.y"
+#line 48 "parser.y"
     { printf("#include <stdio.h>\n#include <stdlib.h>\n\nint main()\n"); ;}
     break;
 
   case 3:
 
 /* Line 1455 of yacc.c  */
-#line 47 "parser.y"
+#line 48 "parser.y"
     { return 0; ;}
     break;
 
   case 4:
 
 /* Line 1455 of yacc.c  */
-#line 49 "parser.y"
+#line 50 "parser.y"
     { printf("{\n"); ;}
     break;
 
   case 5:
 
 /* Line 1455 of yacc.c  */
-#line 49 "parser.y"
+#line 50 "parser.y"
     { codegen_free(); printf("}\n"); ;}
     break;
 
   case 10:
 
 /* Line 1455 of yacc.c  */
-#line 59 "parser.y"
+#line 60 "parser.y"
     { setType(); ;}
     break;
 
   case 11:
 
 /* Line 1455 of yacc.c  */
-#line 59 "parser.y"
+#line 60 "parser.y"
     { declare(); push(); codegen_declare(); ;}
     break;
 
   case 14:
 
 /* Line 1455 of yacc.c  */
-#line 62 "parser.y"
+#line 63 "parser.y"
     { declare(); push(); codegen_declare(); ;}
     break;
 
   case 18:
 
 /* Line 1455 of yacc.c  */
-#line 69 "parser.y"
+#line 70 "parser.y"
     { assertVarDeclared(); push(); ;}
     break;
 
   case 19:
 
 /* Line 1455 of yacc.c  */
-#line 69 "parser.y"
+#line 70 "parser.y"
     { push(); ;}
     break;
 
   case 20:
 
 /* Line 1455 of yacc.c  */
-#line 69 "parser.y"
+#line 70 "parser.y"
     { codegen_assign(); ;}
     break;
 
   case 21:
 
 /* Line 1455 of yacc.c  */
-#line 72 "parser.y"
+#line 73 "parser.y"
     { push(); ;}
     break;
 
   case 22:
 
 /* Line 1455 of yacc.c  */
-#line 72 "parser.y"
+#line 73 "parser.y"
     { codegen_arithmetic(); ;}
     break;
 
   case 23:
 
 /* Line 1455 of yacc.c  */
-#line 73 "parser.y"
+#line 74 "parser.y"
     { push(); ;}
     break;
 
   case 24:
 
 /* Line 1455 of yacc.c  */
-#line 73 "parser.y"
+#line 74 "parser.y"
     { codegen_arithmetic(); ;}
     break;
 
   case 25:
 
 /* Line 1455 of yacc.c  */
-#line 74 "parser.y"
+#line 75 "parser.y"
     { push(); ;}
     break;
 
   case 26:
 
 /* Line 1455 of yacc.c  */
-#line 74 "parser.y"
+#line 75 "parser.y"
     { codegen_arithmetic(); ;}
     break;
 
   case 27:
 
 /* Line 1455 of yacc.c  */
-#line 75 "parser.y"
+#line 76 "parser.y"
     { push(); ;}
     break;
 
   case 28:
 
 /* Line 1455 of yacc.c  */
-#line 75 "parser.y"
+#line 76 "parser.y"
     { codegen_arithmetic(); ;}
     break;
 
   case 29:
 
 /* Line 1455 of yacc.c  */
-#line 76 "parser.y"
+#line 77 "parser.y"
     { push(); ;}
     break;
 
   case 30:
 
 /* Line 1455 of yacc.c  */
-#line 76 "parser.y"
+#line 77 "parser.y"
     { codegen_relop(); ;}
     break;
 
   case 31:
 
 /* Line 1455 of yacc.c  */
-#line 77 "parser.y"
+#line 78 "parser.y"
     { push(); ;}
     break;
 
   case 32:
 
 /* Line 1455 of yacc.c  */
-#line 77 "parser.y"
+#line 78 "parser.y"
     { codegen_relop(); ;}
     break;
 
   case 33:
 
 /* Line 1455 of yacc.c  */
-#line 78 "parser.y"
+#line 79 "parser.y"
     { push(); ;}
     break;
 
   case 34:
 
 /* Line 1455 of yacc.c  */
-#line 78 "parser.y"
+#line 79 "parser.y"
     { codegen_relop(); ;}
     break;
 
   case 35:
 
 /* Line 1455 of yacc.c  */
-#line 79 "parser.y"
+#line 80 "parser.y"
     { push(); ;}
     break;
 
   case 36:
 
 /* Line 1455 of yacc.c  */
-#line 79 "parser.y"
+#line 80 "parser.y"
     { codegen_relop(); ;}
     break;
 
   case 37:
 
 /* Line 1455 of yacc.c  */
-#line 80 "parser.y"
+#line 81 "parser.y"
     { push(); ;}
     break;
 
   case 38:
 
 /* Line 1455 of yacc.c  */
-#line 80 "parser.y"
+#line 81 "parser.y"
     { codegen_relop(); ;}
     break;
 
   case 39:
 
 /* Line 1455 of yacc.c  */
-#line 81 "parser.y"
+#line 82 "parser.y"
     { push(); ;}
     break;
 
   case 40:
 
 /* Line 1455 of yacc.c  */
-#line 81 "parser.y"
+#line 82 "parser.y"
     { codegen_relop(); ;}
     break;
 
   case 42:
 
 /* Line 1455 of yacc.c  */
-#line 83 "parser.y"
+#line 84 "parser.y"
     { assertVarDeclared(); push(); ;}
     break;
 
   case 43:
 
 /* Line 1455 of yacc.c  */
-#line 84 "parser.y"
+#line 85 "parser.y"
     { push(); ;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 1635 "parser.tab.c"
+#line 1636 "parser.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1843,7 +1844,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 90 "parser.y"
+#line 91 "parser.y"
 
 int label[LABEL_LEN];
 
@@ -1856,7 +1857,7 @@ struct Table
 int tableCurrentIndex = 0;
 char type[TYPE_LEN];
 
-char st[STACK_SIZE][10];
+char st[STACK_SIZE][TOKEN_LEN];
 int top=0;
 
 // for temporary variable names
@@ -1877,7 +1878,7 @@ void setType() {
 	strcpy(type,yytext);
 }
 
-bool isInteger(char token[10]) {
+bool isInteger(char token[TOKEN_LEN]) {
     for(int i=0; token[i] != '\0'; i++) {
         if (!isdigit(token[i])) {
             return false;
@@ -1886,12 +1887,19 @@ bool isInteger(char token[10]) {
     return true;
 }
 
-bool isArray(char token[10]) {
-    // TODO
+bool isArray(char token[TOKEN_LEN]) {
+    int size = 0;
+    for(int i=0; i<TOKEN_LEN && token[i] != '\0'; i++) {
+        size++;
+    }
+
+    if (token[0] == '[' && token[size] == ']') {
+        return true;
+    }
     return false;
 }
 
-enum token_type getType(char token[10]) {
+enum token_type getType(char token[TOKEN_LEN]) {
     if (isInteger(token)) {
         return INTEGER;
     } else if (isArray(token)) {
@@ -1974,14 +1982,36 @@ void codegen_assign() {
 
 void codegen_arithmetic() {
     sprintf(temp, "t%d", i++);
-    printf("\tint %s = %s %s %s;\n", temp, st[top-2], st[top-1], st[top]);   // t1 = 5 + 4
+    enum token_type leftType = getType(st[top-2]);
+    enum token_type rightType = getType(st[top]);
+
+    if (leftType == rightType == INTEGER) {
+        printf("\tint %s = %s %s %s;\n", temp, st[top-2], st[top-1], st[top]);   // int t1 = 5 + 4
+    } else if (leftType == rightType == ARRAY) {
+        // TODO
+    } else {
+        yyerror("Incompatible data types.");
+        exit(0);
+    }
+ 
     top -=2;
     strcpy(st[top], temp);
 }
 
 void codegen_relop() {
     sprintf(temp, "t%d", i++);
-    printf("\tint %s = %s %s %s;\n", temp, st[top-2], st[top-1], st[top]);   // t1 = 5 < 4
+    enum token_type leftType = getType(st[top-2]);
+    enum token_type rightType = getType(st[top]);
+
+    if (leftType == rightType == INTEGER) {
+        printf("\tint %s = %s %s %s;\n", temp, st[top-2], st[top-1], st[top]);   // int t1 = 5 < 4
+    } else if (leftType == rightType == ARRAY) {
+        // TODO
+    } else {
+        yyerror("Incompatible data types.");
+        exit(0);
+    }
+
     top -=2;
     strcpy(st[top], temp);
 }

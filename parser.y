@@ -8,6 +8,7 @@
     #define VARNAME_LEN 20
     #define TYPE_LEN 10
     #define LABEL_LEN 200
+    #define TOKEN_LEN 100
     #define TABLE_SIZE 10000
     #define STACK_SIZE 1000
     enum token_type { INTEGER, ARRAY };
@@ -15,9 +16,9 @@
     void yyerror(char* s);
     int yylex();
     void setType();
-    bool isInteger(char token[10]);
-    bool isArray(char token[10]);
-    enum token_type getType(char token[10]);
+    bool isInteger(char token[TOKEN_LEN]);
+    bool isArray(char token[TOKEN_LEN]);
+    enum token_type getType(char token[TOKEN_LEN]);
     struct Table* findVar(char variableName[VARNAME_LEN]);
     bool isVarDeclared(char variableName[VARNAME_LEN]);
     void assertVarDeclared();
@@ -99,7 +100,7 @@ struct Table
 int tableCurrentIndex = 0;
 char type[TYPE_LEN];
 
-char st[STACK_SIZE][10];
+char st[STACK_SIZE][TOKEN_LEN];
 int top=0;
 
 // for temporary variable names
@@ -120,7 +121,7 @@ void setType() {
 	strcpy(type,yytext);
 }
 
-bool isInteger(char token[10]) {
+bool isInteger(char token[TOKEN_LEN]) {
     for(int i=0; token[i] != '\0'; i++) {
         if (!isdigit(token[i])) {
             return false;
@@ -129,12 +130,19 @@ bool isInteger(char token[10]) {
     return true;
 }
 
-bool isArray(char token[10]) {
-    // TODO
+bool isArray(char token[TOKEN_LEN]) {
+    int size = 0;
+    for(int i=0; i<TOKEN_LEN && token[i] != '\0'; i++) {
+        size++;
+    }
+
+    if (token[0] == '[' && token[size] == ']') {
+        return true;
+    }
     return false;
 }
 
-enum token_type getType(char token[10]) {
+enum token_type getType(char token[TOKEN_LEN]) {
     if (isInteger(token)) {
         return INTEGER;
     } else if (isArray(token)) {
@@ -217,14 +225,36 @@ void codegen_assign() {
 
 void codegen_arithmetic() {
     sprintf(temp, "t%d", i++);
-    printf("\tint %s = %s %s %s;\n", temp, st[top-2], st[top-1], st[top]);   // t1 = 5 + 4
+    enum token_type leftType = getType(st[top-2]);
+    enum token_type rightType = getType(st[top]);
+
+    if (leftType == rightType == INTEGER) {
+        printf("\tint %s = %s %s %s;\n", temp, st[top-2], st[top-1], st[top]);   // int t1 = 5 + 4
+    } else if (leftType == rightType == ARRAY) {
+        // TODO
+    } else {
+        yyerror("Incompatible data types.");
+        exit(0);
+    }
+ 
     top -=2;
     strcpy(st[top], temp);
 }
 
 void codegen_relop() {
     sprintf(temp, "t%d", i++);
-    printf("\tint %s = %s %s %s;\n", temp, st[top-2], st[top-1], st[top]);   // t1 = 5 < 4
+    enum token_type leftType = getType(st[top-2]);
+    enum token_type rightType = getType(st[top]);
+
+    if (leftType == rightType == INTEGER) {
+        printf("\tint %s = %s %s %s;\n", temp, st[top-2], st[top-1], st[top]);   // int t1 = 5 < 4
+    } else if (leftType == rightType == ARRAY) {
+        // TODO
+    } else {
+        yyerror("Incompatible data types.");
+        exit(0);
+    }
+
     top -=2;
     strcpy(st[top], temp);
 }
