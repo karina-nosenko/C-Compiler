@@ -81,10 +81,15 @@
     #define LABEL_LEN 200
     #define TABLE_SIZE 10000
     #define STACK_SIZE 1000
+    enum token_type { INTEGER, ARRAY };
 
     void yyerror(char* s);
     int yylex();
     void setType();
+    bool isInteger(char token[10]);
+    bool isArray(char token[10]);
+    enum token_type getType(char token[10]);
+    struct Table* findVar(char variableName[VARNAME_LEN]);
     bool isVarDeclared(char variableName[VARNAME_LEN]);
     void assertVarDeclared();
     void declare();
@@ -99,7 +104,7 @@
 
 
 /* Line 189 of yacc.c  */
-#line 103 "parser.tab.c"
+#line 108 "parser.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -155,7 +160,7 @@ typedef int YYSTYPE;
 
 
 /* Line 264 of yacc.c  */
-#line 159 "parser.tab.c"
+#line 164 "parser.tab.c"
 
 #ifdef short
 # undef short
@@ -453,11 +458,11 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    42,    42,    42,    44,    44,    46,    47,    50,    51,
-      54,    54,    54,    56,    57,    57,    60,    61,    64,    64,
-      64,    67,    67,    68,    68,    69,    69,    70,    70,    71,
-      71,    72,    72,    73,    73,    74,    74,    75,    75,    76,
-      76,    77,    78,    79,    82,    83
+       0,    47,    47,    47,    49,    49,    51,    52,    55,    56,
+      59,    59,    59,    61,    62,    62,    65,    66,    69,    69,
+      69,    72,    72,    73,    73,    74,    74,    75,    75,    76,
+      76,    77,    77,    78,    78,    79,    79,    80,    80,    81,
+      81,    82,    83,    84,    87,    88
 };
 #endif
 
@@ -1402,231 +1407,231 @@ yyreduce:
         case 2:
 
 /* Line 1455 of yacc.c  */
-#line 42 "parser.y"
+#line 47 "parser.y"
     { printf("#include <stdio.h>\n#include <stdlib.h>\n\nint main()\n"); ;}
     break;
 
   case 3:
 
 /* Line 1455 of yacc.c  */
-#line 42 "parser.y"
+#line 47 "parser.y"
     { return 0; ;}
     break;
 
   case 4:
 
 /* Line 1455 of yacc.c  */
-#line 44 "parser.y"
+#line 49 "parser.y"
     { printf("{\n"); ;}
     break;
 
   case 5:
 
 /* Line 1455 of yacc.c  */
-#line 44 "parser.y"
+#line 49 "parser.y"
     { codegen_free(); printf("}\n"); ;}
     break;
 
   case 10:
 
 /* Line 1455 of yacc.c  */
-#line 54 "parser.y"
+#line 59 "parser.y"
     { setType(); ;}
     break;
 
   case 11:
 
 /* Line 1455 of yacc.c  */
-#line 54 "parser.y"
+#line 59 "parser.y"
     { declare(); push(); codegen_declare(); ;}
     break;
 
   case 14:
 
 /* Line 1455 of yacc.c  */
-#line 57 "parser.y"
+#line 62 "parser.y"
     { declare(); push(); codegen_declare(); ;}
     break;
 
   case 18:
 
 /* Line 1455 of yacc.c  */
-#line 64 "parser.y"
+#line 69 "parser.y"
     { assertVarDeclared(); push(); ;}
     break;
 
   case 19:
 
 /* Line 1455 of yacc.c  */
-#line 64 "parser.y"
+#line 69 "parser.y"
     { push(); ;}
     break;
 
   case 20:
 
 /* Line 1455 of yacc.c  */
-#line 64 "parser.y"
+#line 69 "parser.y"
     { codegen_assign(); ;}
     break;
 
   case 21:
 
 /* Line 1455 of yacc.c  */
-#line 67 "parser.y"
+#line 72 "parser.y"
     { push(); ;}
     break;
 
   case 22:
 
 /* Line 1455 of yacc.c  */
-#line 67 "parser.y"
+#line 72 "parser.y"
     { codegen_arithmetic(); ;}
     break;
 
   case 23:
 
 /* Line 1455 of yacc.c  */
-#line 68 "parser.y"
+#line 73 "parser.y"
     { push(); ;}
     break;
 
   case 24:
 
 /* Line 1455 of yacc.c  */
-#line 68 "parser.y"
+#line 73 "parser.y"
     { codegen_arithmetic(); ;}
     break;
 
   case 25:
 
 /* Line 1455 of yacc.c  */
-#line 69 "parser.y"
+#line 74 "parser.y"
     { push(); ;}
     break;
 
   case 26:
 
 /* Line 1455 of yacc.c  */
-#line 69 "parser.y"
+#line 74 "parser.y"
     { codegen_arithmetic(); ;}
     break;
 
   case 27:
 
 /* Line 1455 of yacc.c  */
-#line 70 "parser.y"
+#line 75 "parser.y"
     { push(); ;}
     break;
 
   case 28:
 
 /* Line 1455 of yacc.c  */
-#line 70 "parser.y"
+#line 75 "parser.y"
     { codegen_arithmetic(); ;}
     break;
 
   case 29:
 
 /* Line 1455 of yacc.c  */
-#line 71 "parser.y"
+#line 76 "parser.y"
     { push(); ;}
     break;
 
   case 30:
 
 /* Line 1455 of yacc.c  */
-#line 71 "parser.y"
+#line 76 "parser.y"
     { codegen_relop(); ;}
     break;
 
   case 31:
 
 /* Line 1455 of yacc.c  */
-#line 72 "parser.y"
+#line 77 "parser.y"
     { push(); ;}
     break;
 
   case 32:
 
 /* Line 1455 of yacc.c  */
-#line 72 "parser.y"
+#line 77 "parser.y"
     { codegen_relop(); ;}
     break;
 
   case 33:
 
 /* Line 1455 of yacc.c  */
-#line 73 "parser.y"
+#line 78 "parser.y"
     { push(); ;}
     break;
 
   case 34:
 
 /* Line 1455 of yacc.c  */
-#line 73 "parser.y"
+#line 78 "parser.y"
     { codegen_relop(); ;}
     break;
 
   case 35:
 
 /* Line 1455 of yacc.c  */
-#line 74 "parser.y"
+#line 79 "parser.y"
     { push(); ;}
     break;
 
   case 36:
 
 /* Line 1455 of yacc.c  */
-#line 74 "parser.y"
+#line 79 "parser.y"
     { codegen_relop(); ;}
     break;
 
   case 37:
 
 /* Line 1455 of yacc.c  */
-#line 75 "parser.y"
+#line 80 "parser.y"
     { push(); ;}
     break;
 
   case 38:
 
 /* Line 1455 of yacc.c  */
-#line 75 "parser.y"
+#line 80 "parser.y"
     { codegen_relop(); ;}
     break;
 
   case 39:
 
 /* Line 1455 of yacc.c  */
-#line 76 "parser.y"
+#line 81 "parser.y"
     { push(); ;}
     break;
 
   case 40:
 
 /* Line 1455 of yacc.c  */
-#line 76 "parser.y"
+#line 81 "parser.y"
     { codegen_relop(); ;}
     break;
 
   case 42:
 
 /* Line 1455 of yacc.c  */
-#line 78 "parser.y"
+#line 83 "parser.y"
     { assertVarDeclared(); push(); ;}
     break;
 
   case 43:
 
 /* Line 1455 of yacc.c  */
-#line 79 "parser.y"
+#line 84 "parser.y"
     { push(); ;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 1630 "parser.tab.c"
+#line 1635 "parser.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1838,7 +1843,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 85 "parser.y"
+#line 90 "parser.y"
 
 int label[LABEL_LEN];
 
@@ -1870,6 +1875,45 @@ void yyerror(char *s) {
 
 void setType() {
 	strcpy(type,yytext);
+}
+
+bool isInteger(char token[10]) {
+    for(int i=0; token[i] != '\0'; i++) {
+        if (!isdigit(token[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool isArray(char token[10]) {
+    // TODO
+    return false;
+}
+
+enum token_type getType(char token[10]) {
+    if (isInteger(token)) {
+        return INTEGER;
+    } else if (isArray(token)) {
+        return ARRAY;
+    } else {
+        struct Table* variable = findVar(token);
+        if(variable) {
+            return strcmp(variable->type, "arr") == 0 ? ARRAY : INTEGER;
+        } else {
+            yyerror("Variable not declared");
+		    exit(0);
+        }
+    }
+}
+
+struct Table* findVar(char variableName[VARNAME_LEN]) {
+    for(int i=0; i<tableCurrentIndex; i++) {
+        if (strcmp(table[i].id, variableName) == 0) {
+            return &table[i];
+        }
+    }
+    return NULL;
 }
 
 bool isVarDeclared(char variableName[VARNAME_LEN]) {

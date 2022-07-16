@@ -10,10 +10,15 @@
     #define LABEL_LEN 200
     #define TABLE_SIZE 10000
     #define STACK_SIZE 1000
+    enum token_type { INTEGER, ARRAY };
 
     void yyerror(char* s);
     int yylex();
     void setType();
+    bool isInteger(char token[10]);
+    bool isArray(char token[10]);
+    enum token_type getType(char token[10]);
+    struct Table* findVar(char variableName[VARNAME_LEN]);
     bool isVarDeclared(char variableName[VARNAME_LEN]);
     void assertVarDeclared();
     void declare();
@@ -113,6 +118,45 @@ void yyerror(char *s) {
 
 void setType() {
 	strcpy(type,yytext);
+}
+
+bool isInteger(char token[10]) {
+    for(int i=0; token[i] != '\0'; i++) {
+        if (!isdigit(token[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool isArray(char token[10]) {
+    // TODO
+    return false;
+}
+
+enum token_type getType(char token[10]) {
+    if (isInteger(token)) {
+        return INTEGER;
+    } else if (isArray(token)) {
+        return ARRAY;
+    } else {
+        struct Table* variable = findVar(token);
+        if(variable) {
+            return strcmp(variable->type, "arr") == 0 ? ARRAY : INTEGER;
+        } else {
+            yyerror("Variable not declared");
+		    exit(0);
+        }
+    }
+}
+
+struct Table* findVar(char variableName[VARNAME_LEN]) {
+    for(int i=0; i<tableCurrentIndex; i++) {
+        if (strcmp(table[i].id, variableName) == 0) {
+            return &table[i];
+        }
+    }
+    return NULL;
 }
 
 bool isVarDeclared(char variableName[VARNAME_LEN]) {

@@ -1,4 +1,5 @@
 begin
     int x, y, z;
-    x = 5 + 4 * 3;
+    arr w;
+    x = 5 + w;
 end
