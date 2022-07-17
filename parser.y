@@ -5,16 +5,23 @@
     #include <string.h>
     #include <stdbool.h>
 
-    #define VARNAME_LEN 20
-    #define TYPE_LEN 10
-    #define LABEL_LEN 200
+    #define TYPE_LEN 4
+    #define LABEL_LEN 100
+    #define TOKEN_LEN 100
     #define TABLE_SIZE 10000
     #define STACK_SIZE 1000
-    
+    enum token_type { INTEGER, ARRAY };
+
     void yyerror(char* s);
     int yylex();
+    void addSymbolToTable(char id[TOKEN_LEN], char type[TYPE_LEN], int arr_size);
     void setType();
-    bool isVarDeclared(char variableName[VARNAME_LEN]);
+    bool isInteger(char token[TOKEN_LEN]);
+    bool isConstArray(char token[TOKEN_LEN]);
+    int getConstArrSize(char array[TOKEN_LEN]);
+    enum token_type getType(char token[TOKEN_LEN]);
+    struct Table* findVar(char variableName[TOKEN_LEN]);
+    bool isVarDeclared(char variableName[TOKEN_LEN]);
     void assertVarDeclared();
     void declare();
     void push();
@@ -45,9 +52,16 @@
 %token OP DOT_OP REL_OP
 %token INT_VAL
 %token IDENTIFIER
+%token CONST_ARR
+%token LE GE EQ NE GT LT
+%right '=' 
+%left EQ NE 
+%left LE GE LT GT
+%left '+' '-' 
+%left '*' '/' '@'
 
 %%
-program             : { printf("#include <stdio.h>\n\nint main()\n"); }  block   { return 0; }
+program             : { printf("#include <stdio.h>\n#include <malloc.h>\n\nint main()\n"); }  block   { return 0; }
 
 block               : BEGIN_KWD { tab_print(1); printf("{\n"); } statement_list END { codegen_free(); tab_print(-1); printf("}\n"); }
 
@@ -110,19 +124,19 @@ int label[LABEL_LEN];
 
 struct Table
 {
-	char id[VARNAME_LEN];
+	char id[TOKEN_LEN];
 	char type[TYPE_LEN];
     int arr_size;   // size of the array if the type is arr
 } table[TABLE_SIZE];
 int tableCurrentIndex = 0;
 char type[TYPE_LEN];
 
-char st[STACK_SIZE][10];
+char st[STACK_SIZE][TOKEN_LEN];
 int top=0;
 
 // for temporary variable names
-char temp[2]="t";
-int i = 0;
+char temp[TOKEN_LEN]="t";
+int token_index = 0;
 
 int main(void) {
     return yyparse();
@@ -134,11 +148,87 @@ void yyerror(char *s) {
 
 /* SYMBOL TABLE */
 
+void addSymbolToTable(char id[TOKEN_LEN], char type[TYPE_LEN], int arr_size) {
+    strcpy(table[tableCurrentIndex].id, id);
+    strcpy(table[tableCurrentIndex].type, type);
+    table[tableCurrentIndex].arr_size = arr_size;
+    tableCurrentIndex++;
+}
+
 void setType() {
 	strcpy(type,yytext);
 }
 
-bool isVarDeclared(char variableName[VARNAME_LEN]) {
+bool isInteger(char token[TOKEN_LEN]) {
+    for(int i=0; token[i] != '\0'; i++) {
+        if (!isdigit(token[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool isConstArray(char token[TOKEN_LEN]) {
+    int size = 0;
+    for(int i=0; i<TOKEN_LEN && token[i] != '\0'; i++) {
+        size++;
+    }
+
+    if (token[0] == '[' && token[size-1] == ']') {
+        return true;
+    }
+    return false;
+}
+
+int getConstArrSize(char array[TOKEN_LEN]) {
+    bool empty = true;
+    bool oneElement = true;
+    int numOfCommas = 0;
+    for(int i=1; i<TOKEN_LEN && array[i]!='\0' && array[i]!=']'; i++) {
+        if (isdigit(array[i])) {
+            empty = false;
+        }
+        if (array[i] == ',') {
+            oneElement = false;
+            numOfCommas++;
+        }
+    }
+
+    if (empty) {
+        return 0;
+    } else if (oneElement) {
+        return 1;
+    } else {
+        return numOfCommas + 1;
+    }
+}
+
+enum token_type getType(char token[TOKEN_LEN]) {
+    if (isInteger(token)) {
+        return INTEGER;
+    } else if (isConstArray(token)) {
+        return ARRAY;
+    } else {
+        struct Table* variable = findVar(token);
+        if(variable) {
+            return strcmp(variable->type, "arr") == 0 ? ARRAY : INTEGER;
+        } else {
+            yyerror("Unknown type.");
+		    exit(0);
+        }
+    }
+}
+
+struct Table* findVar(char variableName[TOKEN_LEN]) {
+    for(int i=0; i<tableCurrentIndex; i++) {
+        if (strcmp(table[i].id, variableName) == 0) {
+            return &table[i];
+        }
+    }
+    return NULL;
+}
+
+bool isVarDeclared(char variableName[TOKEN_LEN]) {
     for(int i=0; i<tableCurrentIndex; i++) {
         if (strcmp(table[i].id, variableName) == 0) {
             return true;
@@ -155,7 +245,7 @@ void assertVarDeclared() {
 }
 
 void declare() {
-    char variableName[VARNAME_LEN];
+    char variableName[TOKEN_LEN];
     strcpy(variableName, yytext);
 
     if (isVarDeclared(variableName)) {
@@ -163,14 +253,7 @@ void declare() {
         exit(1);
     }
 
-    strcpy(table[tableCurrentIndex].id, variableName);
-    strcpy(table[tableCurrentIndex].type, type);
-
-    if (strcmp(type, "arr") == 0) {
-        table[tableCurrentIndex].arr_size = 0;
-    }
-
-    tableCurrentIndex++;
+    addSymbolToTable(variableName, type, 0);
 }
 
 /* STACK */
