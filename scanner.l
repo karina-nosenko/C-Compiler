@@ -1,6 +1,6 @@
 %{
 #include "parser.tab.h"
-void yyerror (char *s);
+
 int yylex();
 %}
 
@@ -37,8 +37,8 @@ int yylex();
 -?[0-9][0-9]*               { return INT_VAL; }
 [ \t\n]                     { ; }
 .                           { printf("unexpected character\n"); }
-
 %%
+
 int yywrap() {
     return 1;
 }
