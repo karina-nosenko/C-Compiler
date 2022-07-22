@@ -10,41 +10,63 @@
     #define TOKEN_LEN 100
     #define TABLE_SIZE 10000
     #define STACK_SIZE 1000
+    
+    #define YYDEBUG 1
+    #define YYERROR_VERBOSE
+    int yydebug = 1;
 
     typedef enum {
-        INTEGER,
-        ARRAY
+        ARRAY = 0,
+        INTEGER = 1
     } TokenType;
-    
+
+    typedef enum {
+        ARR = 0,
+        INT = 1,
+        OPERATOR = 2,
+        REL_OPERATOR = 3,
+        EXP_LIST = 4
+    } StackMemberType;
+
     typedef struct {
         char id[TOKEN_LEN];
-        char type[TYPE_LEN];
+        TokenType type;
         int arr_size;   // size of the array if the type is arr
     } Variable, *VariablePtr;
 
     typedef struct {
-        Variable table[TABLE_SIZE];
+        Variable data[TABLE_SIZE];
         int size;
-    } VariableTable, *VariableTablePtr;
+    } Table, *TablePtr;
 
     typedef struct {
-        char st[STACK_SIZE][TOKEN_LEN];
+        char token[TOKEN_LEN];
+        StackMemberType type;
+    } StackMember, *StackMemberPtr;
+
+    typedef struct {
+        StackMember st[STACK_SIZE];
         int top;
     } Stack, *StackPtr;
 
     extern int yylex();
 
-    void yyerror(VariableTablePtr table, StackPtr stack, char (*type)[TYPE_LEN], char* s);
-    void assert_var_status(VariableTablePtr table, bool req_status);
-    void push(StackPtr stack);
-    void codegen_declare(VariableTablePtr table, StackPtr stack, char (*type)[TYPE_LEN]);
-    void codegen_assign(StackPtr stack);
-    void codegen_exp(StackPtr stack);
-    void codegen_print(StackPtr stack);
-    void codegen_arithmetic(StackPtr stack);
-    void codegen_if(StackPtr stack);
-    void codegen_while(StackPtr stack);
-    void codegen_free(VariableTablePtr table);
+    void yyerror(char (*type)[TYPE_LEN], char* s);
+    TokenType assert_var_status(char var_name[TOKEN_LEN], bool required);
+    void insert(TablePtr table, Variable var);
+    void get(TablePtr table, VariablePtr var, char id[TOKEN_LEN], int inx);
+    int find(TablePtr table, char id[TOKEN_LEN]);
+    int size(TablePtr table);
+    void push(StackPtr stack, char token[TOKEN_LEN], StackMemberType type);
+    void pop(StackPtr stack, StackMemberPtr member);
+    void codegen_declare(char (*type)[TYPE_LEN], char var_name[TOKEN_LEN]);
+    void codegen_assign();
+    void codegen_expList();
+    void codegen_print();
+    void codegen_arithmetic();
+    void codegen_if();
+    void codegen_while();
+    void codegen_free();
     void tab_print(int a);
     
     extern char *yytext;
@@ -65,14 +87,14 @@
 %token IDENTIFIER
 %left OP DOT_OP REL_OP
 %right ASSIGN
-%parse-param {VariableTablePtr table}
-%parse-param {StackPtr stack}
 %parse-param {char (*type)[4]}
 
 %%
-program             : { printf("#include <stdio.h>\n#include <malloc.h>\n\nint main()\n"); }  block   { codegen_free(table); return 0; }
+program             : { printf("#include <stdio.h>\n#include <malloc.h>\n\nint main()\n"); }  block   { codegen_free(); return 0; }
+                    ;
 
 block               : BEGIN_KWD { tab_print(1); printf("{\n"); } statement_list END { tab_print(-1); printf("}\n"); }
+                    ;
 
 statement_list      : statement                               
                     | statement statement_list
@@ -86,67 +108,170 @@ statement           : declarator SEMICOLON
                     ;       
 
 declarator          : TYPE { strcpy(*type,yytext); } variable_list
-
-assignment          : variable_declared ASSIGN expression { codegen_assign(stack); }
                     ;
 
-conditional         : IF_COND cond IF_BLOCK { codegen_if(stack); } block
+assignment          : variable_declared ASSIGN expression { codegen_assign(); }
                     ;
 
-loop                : LOOP_COND cond LOOP_BLOCK { codegen_while(stack); } block
+conditional         : IF_COND cond IF_BLOCK { codegen_if(); } block
                     ;
 
-print               : PRINT expression_list { codegen_print(stack); }
+loop                : LOOP_COND cond LOOP_BLOCK { codegen_while(); } block
+                    ;
+
+print               : PRINT expression_list { codegen_print(); }
                     ;
 
 variable_list       : variable_declare 
                     | variable_declare COMMA variable_list
                     ;
 
-expression_list     : expression { codegen_exp(stack); expListCount++; }
-                    | expression COMMA { codegen_exp(stack); expListCount++; } expression_list
+expression_list     : expression { codegen_expList(); }
+                    | expression COMMA { codegen_expList(); } expression_list
                     ;
 
-variable_declare    : IDENTIFIER { codegen_declare(table, stack, type); }
+variable_declare    : IDENTIFIER { codegen_declare(type, yytext); }
                     ;
 
-variable_declared   : IDENTIFIER { assert_var_status(table, true); push(stack); }
+variable_declared   : IDENTIFIER { push(NULL, yytext, assert_var_status(yytext, true)); }
                     ;
 
-expression          : expression OP { push(stack); } expression { codegen_arithmetic(stack); }
+expression          : expression OP { push(NULL, yytext, OPERATOR); } expression { codegen_arithmetic(); }
                     /*TODO| expression DOT_OP { push(); } expression { codegen_dotproduct(); }*/
-                    | PAR_BEGIN { push(stack); } expression PAR_END { push(stack); codegen_arithmetic(stack); }
+                    | PAR_BEGIN { push(NULL, yytext, OPERATOR); } expression PAR_END { push(NULL, yytext, OPERATOR); codegen_arithmetic(); }
                     | variable_declared
                     | number
                     ;       
 
-cond                : expression REL_OP { push(stack); } expression { codegen_arithmetic(stack); }
+cond                : expression REL_OP { push(NULL, yytext, REL_OPERATOR); } expression { codegen_arithmetic(); }
                     ;
-number              : INT_VAL { push(stack); }
-                    | const_arr
-                    ;
-const_arr           : CONST_ARR_BEGIN CONST_ARR_END
-                    | CONST_ARR_BEGIN expression_list CONST_ARR_END
+
+number              : INT_VAL { push(NULL, yytext, INT); }
                     ;
 %%
 
 int main(void) {
-    VariableTable table;
+    Table table;
     Stack stack;
     char type[TYPE_LEN];
 
     table.size = 0;
-    stack.top = 0;
-    return yyparse(&table, &stack, &type);
+    insert(&table, (Variable){0});
+    get(&table, NULL, NULL, 0);
+    find(&table, NULL);
+    size(&table);
+
+    stack.top = -1;
+    push(&stack, NULL, EXP_LIST);
+    pop(&stack, NULL);
+
+    return yyparse(&type);
 }
-void yyerror(VariableTablePtr table, StackPtr stack, char (*type)[TYPE_LEN], char* s) {
+
+void yyerror(char (*type)[TYPE_LEN], char* s) {
 	fprintf(stderr, "error: %s\n", s);
 }
+
 void error(char* s) {
-    yyerror(NULL, NULL, NULL, s);
+    yyerror(NULL, s);
 }
+
 /* SYMBOL TABLE */
-//TODO
+
+void insert(TablePtr table, Variable var) {
+    static TablePtr tablePtr = NULL;
+
+    if(table) {
+        tablePtr = table;
+    } else {
+        strcpy(tablePtr->data[tablePtr->size].id, var.id);
+        tablePtr->data[tablePtr->size].type = var.type;
+        tablePtr->data[tablePtr->size].arr_size = var.type;
+        tablePtr->size++;
+    }
+}
+
+void get(TablePtr table, VariablePtr var, char id[TOKEN_LEN], int inx) {
+    static TablePtr tablePtr = NULL;
+
+    if(table) {
+        tablePtr = table;
+    } else if(!id) {
+        if(inx > tablePtr->size) {
+            char errorMsg[TOKEN_LEN];
+            sprintf(errorMsg, "index %d out of bounds", inx);
+            error(errorMsg);
+            exit(1);
+        }
+        strcpy(var->id, tablePtr->data[inx].id);
+        var->type = tablePtr->data[inx].type;
+        var->arr_size = tablePtr->data[inx].arr_size;
+    } else {
+        int index = find(NULL, id);
+        if(index < 0) {
+            char errorMsg[TOKEN_LEN];
+            sprintf(errorMsg, "Variable %s %s.\n", id, "not declared");
+            error(errorMsg);
+            exit(1);
+        }
+        strcpy(var->id, tablePtr->data[index].id);
+        var->type = tablePtr->data[index].type;
+        var->arr_size = tablePtr->data[index].arr_size;
+    }
+}
+
+int find(TablePtr table, char id[TOKEN_LEN]) {
+    static TablePtr tablePtr = NULL;
+
+    if(table) {
+        tablePtr = table;
+    } else {
+        for(int i = 0; i < tablePtr->size; i++) {
+            if(!strcmp(tablePtr->data[i].id, id)) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+int size(TablePtr table) {
+    static TablePtr tablePtr = NULL;
+
+    if(table) {
+        tablePtr = table;
+    }
+    return tablePtr->size;
+}
+
+/* STACK */
+
+void push(StackPtr stack, char token[TOKEN_LEN], StackMemberType type) {
+    static StackPtr stackPtr = NULL;
+    
+    if(stack) {
+        stackPtr = stack;
+    } else {
+        stackPtr->top++;
+        strcpy(stackPtr->st[stackPtr->top].token, token);
+        stackPtr->st[stackPtr->top].type = type;
+        
+    }
+}
+
+void pop(StackPtr stack, StackMemberPtr member) {
+    static StackPtr stackPtr = NULL;
+    
+    if(stack) {
+        stackPtr = stack;
+    } else {
+        strcpy(member->token, stackPtr->st[stackPtr->top].token);
+        member->type = stackPtr->st[stackPtr->top].type;
+        stackPtr->top--;
+    }
+}
+
+/////////////
 bool isInteger(char token[TOKEN_LEN]) {
     for(int i = (token[0] == '-'); i < TOKEN_LEN && token[i] != '\0'; i++) {
         if (!isdigit(token[i])) {
@@ -159,7 +284,7 @@ bool isInteger(char token[TOKEN_LEN]) {
 bool isConstArray(char token[TOKEN_LEN]) {
     return (token[0] == '[' && token[strnlen_s(token, TOKEN_LEN) - 1] == ']');
 }
-//TODO
+
 int getConstArrSize(char array[TOKEN_LEN]) {
     bool empty = true;
     int numOfCommas = 0;
@@ -179,16 +304,7 @@ int getConstArrSize(char array[TOKEN_LEN]) {
     }
 }
 
-VariablePtr findVar(VariableTablePtr table, char variableName[TOKEN_LEN]) {
-    for(int i = 0; i < table->size; i++) {
-        if (strcmp(table->table[i].id, variableName) == 0) {
-            return &(table->table[i]);
-        }
-    }
-    return NULL;
-}
-//TODO
-TokenType getType(VariableTablePtr table, char token[TOKEN_LEN]) {
+/*TokenType getType(char token[TOKEN_LEN]) {
     if (isInteger(token)) {
         return INTEGER;
     } else if (isConstArray(token)) {
@@ -196,42 +312,49 @@ TokenType getType(VariableTablePtr table, char token[TOKEN_LEN]) {
     } else {
         VariablePtr variable = findVar(table, token);
         if(variable) {
-            return strcmp(variable->type, "arr") == 0 ? ARRAY : INTEGER;
+            return variable->type;
         } else {
             error("Variable wasn\'t found");
 		    exit(1);
         }
     }
-}
+}*/
 
-void assert_var_status(VariableTablePtr table, bool req_status) {
-    if(!findVar(table, yytext) != !req_status) {
-        char errorMsg[TOKEN_LEN] = "Variable ";
-        error(strcat(strcat(errorMsg, yytext), (req_status ? " not declared" : " already declared.")));
-		exit(1);
+TokenType assert_var_status(char var_name[TOKEN_LEN], bool required) {
+    if((find(NULL, var_name) >= 0) != required) {
+        char errorMsg[TOKEN_LEN];
+        sprintf(errorMsg, "Variable %s %s.\n", var_name, (required ? " not declared" : " already declared."));
+        error(errorMsg);
+        exit(1);
+    } else if(!required) {
+        return 0;
     }
+    Variable var;
+    get(NULL, &var, var_name, 0);
+    return var.type;
 }
 
-void declare(VariableTablePtr table, char (*type)[4]) {
-    assert_var_status(table, false);
+void declare(char (*type)[4], char var_name[TOKEN_LEN]) {
+    Variable var;
+    bool isInt = strcmp(*type, "int") == 0;
     
-    // add var to table
-    strcpy(table->table[table->size].id, yytext);
-    strcpy(table->table[table->size].type, *type);
-    table->table[table->size].arr_size = 0;
-    table->size++;
-}
+    assert_var_status(var_name, false);
 
-/* STACK */
-//TODO
-void push(StackPtr stack) {
-    strcpy(stack->st[++stack->top], yytext);
+    strcpy(var.id, var_name);
+    var.type = isInt;
+    var.arr_size = isInt;
+
+    // add var to table
+    insert(NULL, var);
 }
 
 /* CODE GENERATORS */
-//TODO
-void codegen_declare(VariableTablePtr table, StackPtr stack, char (*type)[TYPE_LEN]) {
-    declare(table, type);
+
+void codegen_declare(char (*type)[TYPE_LEN], char var_name[TOKEN_LEN]) {
+    // add variable to variable table
+    declare(type, var_name);
+
+    // print variable to output
     tab_print(0);
     if (strcmp(*type, "arr") == 0) {
         printf("int* %s = NULL;\n", yytext);  // arr x;
@@ -239,57 +362,96 @@ void codegen_declare(VariableTablePtr table, StackPtr stack, char (*type)[TYPE_L
         printf("int %s;\n", yytext);  // int x;
     }
 }
-//TODO
-void codegen_assign(StackPtr stack) {
+
+void codegen_assign() {
+    StackMember var_name, exp;
+    pop(NULL, &exp);
+    pop(NULL, &var_name);
+
     tab_print(0);
-    printf("%s = %s;\n", stack->st[stack->top-1], stack->st[stack->top]);    // x = 5;
-    stack->top -= 2;
+    printf("%s = %s;\n", var_name.token, exp.token);    // x = 5;
 }
-//TODO
-void codegen_arithmetic(StackPtr stack) {
+
+void codegen_arithmetic() {
+    StackMember m1, m2, m3;
     char expVal[TOKEN_LEN];
-    sprintf(expVal, "%s %s %s", stack->st[stack->top-2], stack->st[stack->top-1], stack->st[stack->top]);
-    stack->top -= 2;
-    strcpy(stack->st[stack->top], expVal);
+
+    pop(NULL, &m3);
+    pop(NULL, &m2);
+    pop(NULL, &m1);
+    
+    if((m1.type != m3.type) || (m1.type == m3.type && m2.type == REL_OPERATOR && m1.type != INT)) {
+        error("Type Mismatch.");
+        exit(1);
+    }
+
+    sprintf(expVal, "%s %s %s", m1.token, m2.token, m3.token);
+    push(NULL, expVal, m1.type < 2 ? m1.type : m2.type);
 }
-//TODO
-void codegen_exp(StackPtr stack) {
+
+void codegen_expList() {
     char expVal[TOKEN_LEN];
     if(expListCount) {
-        sprintf(expVal, "%s, %s", stack->st[stack->top - 1], stack->st[stack->top]);
+        StackMember exp1, exp2;
+        pop(NULL, &exp2);
+        pop(NULL, &exp1);
+        if(exp2.type == ARR) {
+            error("can\'t print array like this, please use a loop.");
+            exit(1);
+        }
+        sprintf(expVal, "%s, %s", exp1.token, exp2.token);
     } else {
-        sprintf(expVal, "%s", stack->st[stack->top]);
+        StackMember exp;
+        pop(NULL, &exp);
+        if(exp.type == ARR) {
+            error("can\'t print array like this, please use a loop.");
+            exit(1);
+        }
+        sprintf(expVal, "%s", exp.token);
     }
-    strcpy(stack->st[--stack->top], expVal);
+    push(NULL, expVal, EXP_LIST);
+    expListCount++; 
 }
-//TODO
-void codegen_print(StackPtr stack) {
+
+void codegen_print() {
     if(expListCount == 0) {
         error("can\'t print nothing");
     }
+
+    StackMember expList;
+    pop(NULL, &expList);
+
     tab_print(0);
     printf("printf(\"%c%c", '%', 'd');
     for(int i = 1; i < expListCount; i++) {
         printf(", %c%c", '%', 'd');
     }
-    printf("\", %s);\n", stack->st[stack->top--]);
+
+    printf("\", %s);\n", expList.token);
     expListCount = 0;
 }
 
-void codegen_if(StackPtr stack) {
+void codegen_if() {
+    StackMember cond;
+    pop(NULL, &cond);
     tab_print(0);
-    printf("if(%s)\n", stack->st[stack->top--]);
+    printf("if(%s)\n", cond.token);
 }
 
-void codegen_while(StackPtr stack) {
+void codegen_while() {
+    StackMember cond;
+    pop(NULL, &cond);
     tab_print(0);
-    printf("while(%s)\n", stack->st[stack->top--]);
+    printf("while(%s)\n", cond.token);
 }
 
-void codegen_free(VariableTablePtr table) {
-    for(int i=0; i<table->size; i++) {
-        if (strcmp(table->table[i].type, "arr")==0 && table->table[i].arr_size > 0) {
-            printf("\tfree(%s);\n", table->table[i].id);   // free(x)
+void codegen_free() {
+    int tSize = size(NULL);
+    Variable var;
+    for(int i=0; i < tSize; i++) {
+        get(NULL, &var, NULL, i);
+        if ((var.type == ARRAY) && var.arr_size > 0) {
+            printf("\tfree(%s);\n", var.id);   // free(x)
         }
     }
 }
