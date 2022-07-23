@@ -1,5 +1,5 @@
 interpreter.exe: lex.yy.c parser.tab.c
-	gcc lex.yy.c parser.tab.c -o interpreter.exe
+	gcc -Wall lex.yy.c parser.tab.c symbol_table.c stack.c -o interpreter.exe
 
 lex.yy.c: parser.tab.c scanner.l
 	flex scanner.l

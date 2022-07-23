@@ -4,61 +4,29 @@
     #include <ctype.h>
     #include <string.h>
     #include <stdbool.h>
+    #include "symbol_table.h"
+    #include "stack.h"
 
     #define TYPE_LEN 4
     #define LABEL_LEN 100
     #define TOKEN_LEN 100
-    #define TABLE_SIZE 10000
-    #define STACK_SIZE 1000
     
+    //#define dbg
+    #ifdef dbg
     #define YYDEBUG 1
     #define YYERROR_VERBOSE
     int yydebug = 1;
-
-    typedef enum {
-        ARRAY = 0,
-        INTEGER = 1
-    } TokenType;
-
-    typedef enum {
-        ARR = 0,
-        INT = 1,
-        OPERATOR = 2,
-        REL_OPERATOR = 3,
-        EXP_LIST = 4
-    } StackMemberType;
-
-    typedef struct {
-        char id[TOKEN_LEN];
-        TokenType type;
-        int arr_size;   // size of the array if the type is arr
-    } Variable, *VariablePtr;
-
-    typedef struct {
-        Variable data[TABLE_SIZE];
-        int size;
-    } Table, *TablePtr;
-
-    typedef struct {
-        char token[TOKEN_LEN];
-        StackMemberType type;
-    } StackMember, *StackMemberPtr;
-
-    typedef struct {
-        StackMember st[STACK_SIZE];
-        int top;
-    } Stack, *StackPtr;
+    #endif
 
     extern int yylex();
 
     void yyerror(char (*type)[TYPE_LEN], char* s);
     TokenType assert_var_status(char var_name[TOKEN_LEN], bool required);
-    void insert(TablePtr table, Variable var);
-    void get(TablePtr table, VariablePtr var, char id[TOKEN_LEN], int inx);
-    int find(TablePtr table, char id[TOKEN_LEN]);
-    int size(TablePtr table);
-    void push(StackPtr stack, char token[TOKEN_LEN], StackMemberType type);
-    void pop(StackPtr stack, StackMemberPtr member);
+    
+    void begin_program();
+    void begin_block();
+    void end_block();
+    void end_program();
     void codegen_declare(char (*type)[TYPE_LEN], char var_name[TOKEN_LEN]);
     void codegen_assign();
     void codegen_expList();
@@ -72,6 +40,7 @@
     extern char *yytext;
 
     int expListCount = 0;
+    bool expBegan = false;
 %}
 
 %start program
@@ -90,10 +59,10 @@
 %parse-param {char (*type)[4]}
 
 %%
-program             : { printf("#include <stdio.h>\n#include <malloc.h>\n\nint main()\n"); }  block   { codegen_free(); return 0; }
+program             : { begin_program(); }  block   { end_program(); return 0; }
                     ;
 
-block               : BEGIN_KWD { tab_print(1); printf("{\n"); } statement_list END { tab_print(-1); printf("}\n"); }
+block               : BEGIN_KWD { begin_block(); } statement_list END { end_block(); }
                     ;
 
 statement_list      : statement                               
@@ -141,7 +110,7 @@ expression          : expression OP { push(NULL, yytext, OPERATOR); } expression
                     | PAR_BEGIN { push(NULL, yytext, OPERATOR); } expression PAR_END { push(NULL, yytext, OPERATOR); codegen_arithmetic(); }
                     | variable_declared
                     | number
-                    ;       
+                    ;      
 
 cond                : expression REL_OP { push(NULL, yytext, REL_OPERATOR); } expression { codegen_arithmetic(); }
                     ;
@@ -176,102 +145,8 @@ void error(char* s) {
     yyerror(NULL, s);
 }
 
-/* SYMBOL TABLE */
-
-void insert(TablePtr table, Variable var) {
-    static TablePtr tablePtr = NULL;
-
-    if(table) {
-        tablePtr = table;
-    } else {
-        strcpy(tablePtr->data[tablePtr->size].id, var.id);
-        tablePtr->data[tablePtr->size].type = var.type;
-        tablePtr->data[tablePtr->size].arr_size = var.type;
-        tablePtr->size++;
-    }
-}
-
-void get(TablePtr table, VariablePtr var, char id[TOKEN_LEN], int inx) {
-    static TablePtr tablePtr = NULL;
-
-    if(table) {
-        tablePtr = table;
-    } else if(!id) {
-        if(inx > tablePtr->size) {
-            char errorMsg[TOKEN_LEN];
-            sprintf(errorMsg, "index %d out of bounds", inx);
-            error(errorMsg);
-            exit(1);
-        }
-        strcpy(var->id, tablePtr->data[inx].id);
-        var->type = tablePtr->data[inx].type;
-        var->arr_size = tablePtr->data[inx].arr_size;
-    } else {
-        int index = find(NULL, id);
-        if(index < 0) {
-            char errorMsg[TOKEN_LEN];
-            sprintf(errorMsg, "Variable %s %s.\n", id, "not declared");
-            error(errorMsg);
-            exit(1);
-        }
-        strcpy(var->id, tablePtr->data[index].id);
-        var->type = tablePtr->data[index].type;
-        var->arr_size = tablePtr->data[index].arr_size;
-    }
-}
-
-int find(TablePtr table, char id[TOKEN_LEN]) {
-    static TablePtr tablePtr = NULL;
-
-    if(table) {
-        tablePtr = table;
-    } else {
-        for(int i = 0; i < tablePtr->size; i++) {
-            if(!strcmp(tablePtr->data[i].id, id)) {
-                return i;
-            }
-        }
-    }
-    return -1;
-}
-
-int size(TablePtr table) {
-    static TablePtr tablePtr = NULL;
-
-    if(table) {
-        tablePtr = table;
-    }
-    return tablePtr->size;
-}
-
-/* STACK */
-
-void push(StackPtr stack, char token[TOKEN_LEN], StackMemberType type) {
-    static StackPtr stackPtr = NULL;
-    
-    if(stack) {
-        stackPtr = stack;
-    } else {
-        stackPtr->top++;
-        strcpy(stackPtr->st[stackPtr->top].token, token);
-        stackPtr->st[stackPtr->top].type = type;
-        
-    }
-}
-
-void pop(StackPtr stack, StackMemberPtr member) {
-    static StackPtr stackPtr = NULL;
-    
-    if(stack) {
-        stackPtr = stack;
-    } else {
-        strcpy(member->token, stackPtr->st[stackPtr->top].token);
-        member->type = stackPtr->st[stackPtr->top].type;
-        stackPtr->top--;
-    }
-}
-
 /////////////
+
 bool isInteger(char token[TOKEN_LEN]) {
     for(int i = (token[0] == '-'); i < TOKEN_LEN && token[i] != '\0'; i++) {
         if (!isdigit(token[i])) {
@@ -350,6 +225,38 @@ void declare(char (*type)[4], char var_name[TOKEN_LEN]) {
 
 /* CODE GENERATORS */
 
+void begin_program() {
+    printf("#include <stdio.h>\n");
+    printf("#include <malloc.h>\n");
+    printf("\n");
+    tab_print(1);
+    printf("int main() {\n");
+    tab_print(0);
+    printf("int **ts;\n");
+    tab_print(0);
+    printf("int *ls;\n");
+    tab_print(0);
+    printf("int lts;\n");
+}
+
+void begin_block() {
+    tab_print(1);
+    printf("{\n"); 
+}
+
+void end_block() {
+    
+    tab_print(-1);
+    printf("}\n");
+}
+
+void end_program() {
+    printf("\n");
+    codegen_free();
+    tab_print(-1);
+    printf("}\n");
+}
+
 void codegen_declare(char (*type)[TYPE_LEN], char var_name[TOKEN_LEN]) {
     // add variable to variable table
     declare(type, var_name);
@@ -367,9 +274,20 @@ void codegen_assign() {
     StackMember var_name, exp;
     pop(NULL, &exp);
     pop(NULL, &var_name);
-
-    tab_print(0);
-    printf("%s = %s;\n", var_name.token, exp.token);    // x = 5;
+    if(var_name.type == INT) {
+        tab_print(0);
+        printf("%s = %s;\n", var_name.token, exp.token);    // x = 5;
+    }/* else {
+        tab_print(0);
+        printf("%s = realloc(%s, sizeof(int) * %d);\n", var_name.token, var_name.token, );
+        tab_print(1);
+        
+        printf("for(int i = 0; i < %d; i++) {\n", );
+        tab_print(0);
+        printf("%s[i] = ");
+        tab_print(-1);
+        printf("}\n");
+    }*/
 }
 
 void codegen_arithmetic() {
@@ -384,8 +302,16 @@ void codegen_arithmetic() {
         error("Type Mismatch.");
         exit(1);
     }
-
-    sprintf(expVal, "%s %s %s", m1.token, m2.token, m3.token);
+    
+    switch(m1.type) {
+    case INT:
+    case OPERATOR:
+        sprintf(expVal, "%s %s %s", m1.token, m2.token, m3.token);
+        break;
+    case ARR:
+        
+        break;
+    }
     push(NULL, expVal, m1.type < 2 ? m1.type : m2.type);
 }
 
@@ -451,9 +377,20 @@ void codegen_free() {
     for(int i=0; i < tSize; i++) {
         get(NULL, &var, NULL, i);
         if ((var.type == ARRAY) && var.arr_size > 0) {
-            printf("\tfree(%s);\n", var.id);   // free(x)
+            tab_print(0);
+            printf("free(%s);\n", var.id);   // free(x)
         }
     }
+    tab_print(1);
+    printf("for(int i = 0; i < lts; i++) {\n");
+    tab_print(0);
+    printf("free(ts[i]);\n");
+    tab_print(-1);
+    printf("}\n");
+    tab_print(0);
+    printf("free(ls);\n");
+    tab_print(0);
+    printf("free(ts);\n");
 }
 
 void tab_print(int a) {
