@@ -2,7 +2,7 @@ begin
     int x, y, z;
     y = 0;
     z = 0;
-    x = (5 + 4) * 3;
+    x = (5 + 4) * 3 + 0;
     while y != 1 do begin
         print x, y, z;
         if x == 27 then begin
@@ -20,4 +20,5 @@ begin
             end
         end
     end
+    print x, y, z;
 end

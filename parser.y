@@ -40,7 +40,7 @@
     extern char *yytext;
 
     int expListCount = 0;
-    bool expBegan = false;
+    int lts = 0;
 %}
 
 %start program
@@ -106,10 +106,10 @@ variable_declared   : IDENTIFIER { push(NULL, yytext, assert_var_status(yytext, 
                     ;
 
 expression          : expression OP { push(NULL, yytext, OPERATOR); } expression { codegen_arithmetic(); }
-                    /*TODO| expression DOT_OP { push(); } expression { codegen_dotproduct(); }*/
+                    /*| expression DOT_OP { push(); } expression { codegen_dotproduct(); }*/
                     | PAR_BEGIN { push(NULL, yytext, OPERATOR); } expression PAR_END { push(NULL, yytext, OPERATOR); codegen_arithmetic(); }
-                    | variable_declared
-                    | number
+                    | variable_declared {}
+                    | number {}
                     ;      
 
 cond                : expression REL_OP { push(NULL, yytext, REL_OPERATOR); } expression { codegen_arithmetic(); }
@@ -232,11 +232,11 @@ void begin_program() {
     tab_print(1);
     printf("int main() {\n");
     tab_print(0);
-    printf("int **ts;\n");
+    printf("int **ts = NULL;\n");
     tab_print(0);
-    printf("int *ls;\n");
+    printf("int *ls = NULL;\n");
     tab_print(0);
-    printf("int lts;\n");
+    printf("int lts = 0;\n");
 }
 
 void begin_block() {
@@ -305,14 +305,32 @@ void codegen_arithmetic() {
     
     switch(m1.type) {
     case INT:
-    case OPERATOR:
-        sprintf(expVal, "%s %s %s", m1.token, m2.token, m3.token);
+        if(m2.type == REL_OPERATOR) {
+            sprintf(expVal, "%s %s %s", m1.token, m2.token, m3.token);
+        } else {
+        tab_print(0);
+        printf("lts++;\n");
+        tab_print(0);
+        printf("ts = realloc(ts, sizeof(int*) * lts);\n");
+        tab_print(0);
+        printf("ls = realloc(ls, sizeof(int) * lts);\n");
+        tab_print(0);
+        printf("ls[lts - 1] = 1;\n");
+        tab_print(0);
+        printf("ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);\n");
+        tab_print(0);
+        printf("ts[lts - 1][0] = %s %s %s;\n", m1.token, m2.token, m3.token);
+        sprintf(expVal, "ts[%d][0]", lts++);
+        }
+        push(NULL, expVal, INT);
         break;
     case ARR:
-        
+
+        break;
+    case OPERATOR:
+        push(NULL, m2.token, m2.type);
         break;
     }
-    push(NULL, expVal, m1.type < 2 ? m1.type : m2.type);
 }
 
 void codegen_expList() {
@@ -353,7 +371,7 @@ void codegen_print() {
         printf(", %c%c", '%', 'd');
     }
 
-    printf("\", %s);\n", expList.token);
+    printf("\\n\", %s);\n", expList.token);
     expListCount = 0;
 }
 
