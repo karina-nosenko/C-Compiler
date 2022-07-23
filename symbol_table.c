@@ -47,7 +47,7 @@ void insert(TablePtr table, Variable var) {
         }
         strcpy(tablePtr->data[tablePtr->size].id, var.id);
         tablePtr->data[tablePtr->size].type = var.type;
-        tablePtr->data[tablePtr->size].arr_size = var.type;
+        tablePtr->data[tablePtr->size].arr_size = var.arr_size;
         tablePtr->size++;
     }
 }
@@ -78,5 +78,22 @@ void get(TablePtr table, VariablePtr var, char id[TOKEN_LEN], int inx) {
         strcpy(var->id, tablePtr->data[index].id);
         var->type = tablePtr->data[index].type;
         var->arr_size = tablePtr->data[index].arr_size;
+    }
+}
+
+void update(TablePtr table, char id[TOKEN_LEN], int new_size) {
+    static TablePtr tablePtr = NULL;
+
+    if(table) {
+        tablePtr = table;
+    } else {
+        int inx = find(NULL, id);
+        if(inx < 0) {
+            char errorMsg[TOKEN_LEN];
+            sprintf(errorMsg, "Variable %s not declared.\n", id);
+            error(errorMsg);
+            exit(1);
+        }
+        tablePtr->data[inx].arr_size = new_size;
     }
 }

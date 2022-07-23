@@ -1,24 +1,8 @@
 begin
-    int x, y, z;
-    y = 0;
-    z = 0;
-    x = (5 + 4) * 3 + 0;
-    while y != 1 do begin
-        print x, y, z;
-        if x == 27 then begin
-            y = 1;
-            z = 2;
-        end
-        if x != 27 then begin
-            y = 0;
-            z = 1;
-            if x < 27 then begin
-                x = x + 1;
-            end
-            if x > 27 then begin
-                x = x - 1;
-            end
-        end
-    end
-    print x, y, z;
+    arr a, b;
+    int n;
+    a = [1, 2, 3, 4];
+    b = a / [1, 2, 3];
+    n = b @ [1, 1, 1, 1];
+    print n;
 end

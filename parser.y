@@ -22,7 +22,9 @@
 
     void yyerror(char (*type)[TYPE_LEN], char* s);
     TokenType assert_var_status(char var_name[TOKEN_LEN], bool required);
-    
+    void combine_numbers();
+    void gen_empty_arr();
+    void gen_const_arr();
     void begin_program();
     void begin_block();
     void end_block();
@@ -32,6 +34,8 @@
     void codegen_expList();
     void codegen_print();
     void codegen_arithmetic();
+    void codegen_dotproduct();
+    void codegen_const_arr();
     void codegen_if();
     void codegen_while();
     void codegen_free();
@@ -41,6 +45,7 @@
 
     int expListCount = 0;
     int lts = 0;
+    int ls_last = 0;
 %}
 
 %start program
@@ -59,7 +64,7 @@
 %parse-param {char (*type)[4]}
 
 %%
-program             : { begin_program(); }  block   { end_program(); return 0; }
+program             : BEGIN_KWD { begin_program(); } statement_list END { end_program(); return 0; }
                     ;
 
 block               : BEGIN_KWD { begin_block(); } statement_list END { end_block(); }
@@ -106,16 +111,24 @@ variable_declared   : IDENTIFIER { push(NULL, yytext, assert_var_status(yytext, 
                     ;
 
 expression          : expression OP { push(NULL, yytext, OPERATOR); } expression { codegen_arithmetic(); }
-                    /*| expression DOT_OP { push(); } expression { codegen_dotproduct(); }*/
+                    | expression DOT_OP expression { codegen_dotproduct(); }
                     | PAR_BEGIN { push(NULL, yytext, OPERATOR); } expression PAR_END { push(NULL, yytext, OPERATOR); codegen_arithmetic(); }
-                    | variable_declared {}
-                    | number {}
+                    | variable_declared
+                    | const_arr { codegen_const_arr(); }
+                    | number
                     ;      
 
 cond                : expression REL_OP { push(NULL, yytext, REL_OPERATOR); } expression { codegen_arithmetic(); }
                     ;
 
 number              : INT_VAL { push(NULL, yytext, INT); }
+                    ;
+numbers             : number
+                    | number COMMA numbers { combine_numbers(); }
+                    ;
+
+const_arr           : CONST_ARR_BEGIN CONST_ARR_END { gen_empty_arr(); }
+                    | CONST_ARR_BEGIN numbers CONST_ARR_END { gen_const_arr(); }
                     ;
 %%
 
@@ -127,6 +140,7 @@ int main(void) {
     table.size = 0;
     insert(&table, (Variable){0});
     get(&table, NULL, NULL, 0);
+    update(&table, NULL, 0);
     find(&table, NULL);
     size(&table);
 
@@ -159,41 +173,16 @@ bool isInteger(char token[TOKEN_LEN]) {
 bool isConstArray(char token[TOKEN_LEN]) {
     return (token[0] == '[' && token[strnlen_s(token, TOKEN_LEN) - 1] == ']');
 }
-
+//TODO
 int getConstArrSize(char array[TOKEN_LEN]) {
-    bool empty = true;
-    int numOfCommas = 0;
-    for(int i=1; i<TOKEN_LEN && array[i]!='\0' && array[i]!=']'; i++) {
-        if (isdigit(array[i])) {
-            empty = false;
-        }
-        if (array[i] == ',') {
-            numOfCommas++;
-        }
+    int elementCount = 0;
+    bool began = false;
+    while(strtok(((!began) ? array : NULL), ", []{}")) {
+        began = true;
+        elementCount++;
     }
-
-    if (empty) {
-        return 0;
-    } else {
-        return numOfCommas + 1;
-    }
+    return elementCount;
 }
-
-/*TokenType getType(char token[TOKEN_LEN]) {
-    if (isInteger(token)) {
-        return INTEGER;
-    } else if (isConstArray(token)) {
-        return ARRAY;
-    } else {
-        VariablePtr variable = findVar(table, token);
-        if(variable) {
-            return variable->type;
-        } else {
-            error("Variable wasn\'t found");
-		    exit(1);
-        }
-    }
-}*/
 
 TokenType assert_var_status(char var_name[TOKEN_LEN], bool required) {
     if((find(NULL, var_name) >= 0) != required) {
@@ -207,6 +196,29 @@ TokenType assert_var_status(char var_name[TOKEN_LEN], bool required) {
     Variable var;
     get(NULL, &var, var_name, 0);
     return var.type;
+}
+
+void combine_numbers() {
+    char expVal[TOKEN_LEN];
+    StackMember m1, m2;
+    pop(NULL, &m2);
+    pop(NULL, &m1);
+    sprintf(expVal, "%s, %s", m1.token, m2.token);
+    push(NULL, expVal, INT);
+}
+
+void gen_empty_arr() {
+    char expVal[TOKEN_LEN];
+    sprintf(expVal, "[]");
+    push(NULL, expVal, ARR);
+}
+
+void gen_const_arr() {
+    char expVal[TOKEN_LEN];
+    StackMember m;
+    pop(NULL, &m);
+    sprintf(expVal, "[%s]", m.token);
+    push(NULL, expVal, ARR);
 }
 
 void declare(char (*type)[4], char var_name[TOKEN_LEN]) {
@@ -228,6 +240,131 @@ void declare(char (*type)[4], char var_name[TOKEN_LEN]) {
 void begin_program() {
     printf("#include <stdio.h>\n");
     printf("#include <malloc.h>\n");
+    printf("#include <string.h>\n");
+    
+    tab_print(1);
+    printf("int add_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
+    tab_print(0);
+    printf("int i, min, max;\n");
+    tab_print(0);
+    printf("min = (len1 < len2) ? len1 : len2;\n");
+    tab_print(0);
+    printf("max = (len1 > len2) ? len1 : len2;\n");
+    tab_print(0);
+    printf("*total = malloc(sizeof(int) * max);\n");
+    tab_print(1);
+    printf("for(i = 0; i < min; i++) {\n");  
+    tab_print(0);
+    printf("(*total)[i] = arr1[i] + arr2[i];\n");
+    tab_print(-1);
+    printf("}\n");
+    tab_print(1);
+    printf("for(int *pMax = ((len1 > len2) ? arr1 : arr2);i < max; i++) {\n");
+    tab_print(0);
+    printf("(*total)[i] = pMax[i];\n");
+    tab_print(-1);
+    printf("}\n");
+    tab_print(0);
+    printf("return max;\n");
+    tab_print(-1);
+    printf("}\n");
+
+    tab_print(1);
+    printf("int sub_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
+    tab_print(0);
+    printf("int i, min, max;\n");
+    tab_print(0);
+    printf("min = (len1 < len2) ? len1 : len2;\n");
+    tab_print(0);
+    printf("max = (len1 > len2) ? len1 : len2;\n");
+    tab_print(0);
+    printf("*total = malloc(sizeof(int) * max);\n");
+    tab_print(1);
+    printf("for(i = 0; i < min; i++) {\n");
+    tab_print(0);
+    printf("(*total)[i] = arr1[i] - arr2[i];\n");
+    tab_print(-1);
+    printf("}\n");
+    tab_print(1);
+    printf("for(int *pMax = ((len1 > len2) ? arr1 : arr2);i < max; i++) {\n");
+    tab_print(0);
+    printf("(*total)[i] = pMax[i] * ((len1 > len2) ? 1 : -1);\n");
+    tab_print(-1);
+    printf("}\n");
+    tab_print(0);
+    printf("return max;\n");
+    tab_print(-1);
+    printf("}\n");
+
+    tab_print(1);
+    printf("int mul_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
+    tab_print(0);
+    printf("int i, min, max;\n");
+    tab_print(0);
+    printf("min = (len1 < len2) ? len1 : len2;\n");
+    tab_print(0);
+    printf("max = (len1 > len2) ? len1 : len2;\n");
+    tab_print(0);
+    printf("*total = malloc(sizeof(int) * max);\n");
+    tab_print(1);
+    printf("for(i = 0; i < min; i++) {\n");
+    tab_print(0);
+    printf("(*total)[i] = arr1[i] * arr2[i];\n");
+    tab_print(-1);
+    printf("}\n");
+    tab_print(1);
+    printf("for(;i < max; i++) {\n");
+    tab_print(0);
+    printf("(*total)[i] = 0;\n");
+    tab_print(-1);
+    printf("}\n");
+    tab_print(0);
+    printf("return max;\n");
+    tab_print(-1);
+    printf("}\n");
+
+    tab_print(1);
+    printf("int div_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
+    tab_print(0);
+    printf("int i, min, max;\n");
+    tab_print(0);
+    printf("min = (len1 < len2) ? len1 : len2;\n");
+    tab_print(0);
+    printf("max = (len1 > len2) ? len1 : len2;\n");
+    tab_print(0);
+    printf("*total = malloc(sizeof(int) * max);\n");
+    tab_print(1);
+    printf("for(i = 0; i < min; i++) {\n");
+    tab_print(0);
+    printf("(*total)[i] = arr1[i] / arr2[i];\n");
+    tab_print(-1);
+    printf("}\n");
+    tab_print(1);
+    printf("for(int *pMax = ((len1 > len2) ? arr1 : arr2);i < max; i++) {\n");
+    tab_print(0);
+    printf("(*total)[i] = ((len1 > len2) ? (pMax[i] / 0) : (0 / pMax[i]));\n");
+    tab_print(-1);
+    printf("}\n");
+    tab_print(0);
+    printf("return max;\n");
+    tab_print(-1);
+    printf("}\n");
+    
+    tab_print(1);
+    printf("int dot_product_arrays(int *arr1, int len1, int *arr2, int len2) {\n");
+	tab_print(0);
+    printf("int sum = 0;\n");
+	tab_print(1);
+    printf("for(int i = 0; i < ((len1 < len2) ? len1 : len2); i++) {\n");
+	tab_print(0);
+    printf("sum += arr1[i] * arr2[i];\n");
+	tab_print(-1);
+    printf("}\n");
+    tab_print(0);
+	printf("return sum;\n");
+    tab_print(-1);
+    printf("}\n");
+
     printf("\n");
     tab_print(1);
     printf("int main() {\n");
@@ -277,17 +414,17 @@ void codegen_assign() {
     if(var_name.type == INT) {
         tab_print(0);
         printf("%s = %s;\n", var_name.token, exp.token);    // x = 5;
-    }/* else {
+    } else {
         tab_print(0);
-        printf("%s = realloc(%s, sizeof(int) * %d);\n", var_name.token, var_name.token, );
+        printf("%s = realloc(%s, sizeof(int) * ls[lts - 1]);\n", var_name.token, var_name.token);
         tab_print(1);
-        
-        printf("for(int i = 0; i < %d; i++) {\n", );
+        printf("for(int i = 0; i < ls[lts - 1]; i++) {\n");
         tab_print(0);
-        printf("%s[i] = ");
+        printf("%s[i] = ts[lts - 1][i];\n", var_name.token);
         tab_print(-1);
         printf("}\n");
-    }*/
+        update(NULL, var_name.token, ls_last);
+    }
 }
 
 void codegen_arithmetic() {
@@ -325,12 +462,146 @@ void codegen_arithmetic() {
         push(NULL, expVal, INT);
         break;
     case ARR:
-
+        int l1, l3;
+        switch(m2.token[0]) {
+            case '+':
+                strcpy(m2.token, "add");
+                break;
+            case '-':
+                strcpy(m2.token, "sub");
+                break;
+            case '*':
+                strcpy(m2.token, "mul");
+                break;
+            case '/':
+                strcpy(m2.token, "div");
+                break;
+        }
+        if(isConstArray(m1.token)) {
+            l1 = getConstArrSize(m1.token);
+            push(NULL, m1.token, m1.type);
+            codegen_const_arr();
+            pop(NULL, &m1);
+        } else {
+            Variable var;
+            get(NULL, &var, m1.token, 0);
+            l1 = var.arr_size;
+        }
+        if(isConstArray(m3.token)) {
+            l3 = getConstArrSize(m3.token);
+            push(NULL, m3.token, m3.type);
+            codegen_const_arr();
+            pop(NULL, &m3);
+        } else {
+            Variable var;
+            get(NULL, &var, m3.token, 0);
+            l3 = var.arr_size;
+        }
+        tab_print(0);
+        printf("lts++;\n");
+        tab_print(0);
+        printf("ts = realloc(ts, sizeof(int*) * lts);\n");
+        tab_print(0);
+        printf("ls = realloc(ls, sizeof(int) * lts);\n");
+        tab_print(0);
+        printf("ls[lts - 1] = %s_arrays(%s, %d, %s, %d, &(ts[lts - 1]));", m2.token, m1.token, l1, m3.token, l3);
+        ls_last = ((l1 > l3) ? l1 : l3);
+        Variable var;
+        sprintf(var.id, "ts[%d]", lts);
+        var.type = ARRAY;
+        var.arr_size = ls_last;
+        insert(NULL, var);
+        sprintf(expVal, "ts[%d]", lts++);
+        push(NULL, expVal, INT);
         break;
     case OPERATOR:
         push(NULL, m2.token, m2.type);
         break;
     }
+}
+
+void codegen_dotproduct() {
+    StackMember m1, m3;
+    int l1 = 0, l3 = 0;
+    char expVal[TOKEN_LEN];
+
+    pop(NULL, &m3);
+    pop(NULL, &m1);
+    
+    if((m1.type != m3.type) || (m1.type != ARR)) {
+        error("Type Mismatch.");
+        exit(1);
+    }
+    if(isConstArray(m1.token)) {
+        l1 = getConstArrSize(m1.token);
+        push(NULL, m1.token, m1.type);
+        codegen_const_arr();
+        pop(NULL, &m1);
+    } else {
+        Variable var;
+        get(NULL, &var, m1.token, 0);
+        l1 = var.arr_size;
+    }
+    if(isConstArray(m3.token)) {
+        fprintf(stderr, "m3 const\n");
+        l3 = getConstArrSize(m3.token);
+        push(NULL, m3.token, m3.type);
+        codegen_const_arr();
+        pop(NULL, &m3);
+    } else {
+        Variable var;
+        get(NULL, &var, m3.token, 0);
+        l3 = var.arr_size;
+    }
+    tab_print(0);
+    printf("lts++;\n");
+    tab_print(0);
+    printf("ts = realloc(ts, sizeof(int*) * lts);\n");
+    tab_print(0);
+    printf("ls = realloc(ls, sizeof(int) * lts);\n");
+    tab_print(0);
+    printf("ls[lts - 1] = 1;\n");
+    tab_print(0);
+    printf("ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);\n");
+    tab_print(0);
+    printf("*ts[lts - 1] = dot_product_arrays(%s, %d, %s, %d);\n", m1.token, l1, m3.token, l3);
+    Variable var;
+    sprintf(var.id, "ts[%d]", lts);
+    var.type = INTEGER;
+    ls_last = var.arr_size = 1;
+    insert(NULL, var);
+    sprintf(expVal, "*ts[%d]", lts++);
+    push(NULL, expVal, INT);
+}
+
+void codegen_const_arr() {
+    StackMember m;
+    Variable var;
+    pop(NULL, &m);
+
+    char temp[TOKEN_LEN] = {0};
+    strncpy(temp, m.token + 1, strlen(m.token) - 2);
+    
+    sprintf(var.id, "ts[%d]", lts);
+    var.type = ARRAY;
+    ls_last = var.arr_size = getConstArrSize(m.token);
+    insert(NULL, var);
+
+    tab_print(0);
+    printf("lts++;\n");
+    tab_print(0);
+    printf("ts = realloc(ts, sizeof(int*) * lts);\n");
+    tab_print(0);
+    printf("ls = realloc(ls, sizeof(int) * lts);\n");
+    tab_print(0);
+    printf("ls[lts - 1] = %d;\n", var.arr_size);
+    tab_print(0);
+    printf("ts[lts - 1] = malloc(sizeof(int)*ls[lts-1]);\n");
+    tab_print(0);
+    printf("memcpy(ts[lts - 1], (int[]){%s}, sizeof(int) * ls[lts - 1]);\n", temp);
+    sprintf(m.token, "ts[%d]", lts++);
+
+    push(NULL, m.token, m.type);
 }
 
 void codegen_expList() {
@@ -399,12 +670,6 @@ void codegen_free() {
             printf("free(%s);\n", var.id);   // free(x)
         }
     }
-    tab_print(1);
-    printf("for(int i = 0; i < lts; i++) {\n");
-    tab_print(0);
-    printf("free(ts[i]);\n");
-    tab_print(-1);
-    printf("}\n");
     tab_print(0);
     printf("free(ls);\n");
     tab_print(0);

@@ -22,6 +22,7 @@ typedef struct {
 
 void insert(TablePtr table, Variable var);
 void get(TablePtr table, VariablePtr var, char id[TOKEN_LEN], int inx);
+void update(TablePtr table, char id[TOKEN_LEN], int new_size);
 int find(TablePtr table, char id[TOKEN_LEN]);
 int size(TablePtr table);
 #endif // SYMBOL_TABLE_H

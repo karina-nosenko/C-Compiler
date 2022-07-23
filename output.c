@@ -1,75 +1,123 @@
 #include <stdio.h>
 #include <malloc.h>
+#include <string.h>
+int add_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {
+	int i, min, max;
+	min = (len1 < len2) ? len1 : len2;
+	max = (len1 > len2) ? len1 : len2;
+	*total = malloc(sizeof(int) * max);
+	for(i = 0; i < min; i++) {
+		printf("min: %d\n", min);
+		printf("max: %d\n", max);
+		(*total)[i] = arr1[i] + arr2[i];
+		printf("arr1[%d]: %d\n", i, arr1[i]);
+		printf("arr2[%d]: %d\n", i, arr2[i]);
+		printf("total[%d]: %d\n", i, (*total)[i]);
+	}
+	for(int *pMax = ((len1 > len2) ? arr1 : arr2);i < max; i++) {
+		(*total)[i] = pMax[i];
+		printf("total[%d]: %d\n", i, (*total)[i]);
+	}
+	return max;
+}
+int sub_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {
+	int i, min, max;
+	min = (len1 < len2) ? len1 : len2;
+	max = (len1 > len2) ? len1 : len2;
+	*total = malloc(sizeof(int) * max);
+	for(i = 0; i < min; i++) {
+		(*total)[i] = arr1[i] - arr2[i];
+	}
+	for(int *pMax = ((len1 > len2) ? arr1 : arr2);i < max; i++) {
+		(*total)[i] = pMax[i] * ((len1 > len2) ? 1 : -1);
+	}
+	return max;
+}
+int mul_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {
+	int i, min, max;
+	min = (len1 < len2) ? len1 : len2;
+	max = (len1 > len2) ? len1 : len2;
+	*total = malloc(sizeof(int) * max);
+	for(i = 0; i < min; i++) {
+		(*total)[i] = arr1[i] * arr2[i];
+	}
+	for(;i < max; i++) {
+		(*total)[i] = 0;
+	}
+	return max;
+}
+int div_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {
+	int i, min, max;
+	min = (len1 < len2) ? len1 : len2;
+	max = (len1 > len2) ? len1 : len2;
+	*total = malloc(sizeof(int) * max);
+	for(i = 0; i < min; i++) {
+		(*total)[i] = arr1[i] / arr2[i];
+	}
+	for(int *pMax = ((len1 > len2) ? arr1 : arr2);i < max; i++) {
+		(*total)[i] = ((len1 > len2) ? (pMax[i] / 0) : (0 / pMax[i]));
+	}
+	return max;
+}
+int dp_arrays(int *arr1, int len1, int *arr2, int len2) {
+	int sum = 0;
+	for(int i = 0; i < ((len1 < len2) ? len1 : len2); i++) {
+		sum += arr1[i] * arr2[i];
+	}
+	return sum;
+}
 
 int main() {
 	int **ts = NULL;
 	int *ls = NULL;
 	int lts = 0;
-	{
-		int x;
-		int y;
-		int z;
-		y = 0;
-		z = 0;
-		lts++;
-		ts = realloc(ts, sizeof(int*) * lts);
-		ls = realloc(ls, sizeof(int) * lts);
-		ls[lts - 1] = 1;
-		ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);
-		ts[lts - 1][0] = 5 + 4;
-		lts++;
-		ts = realloc(ts, sizeof(int*) * lts);
-		ls = realloc(ls, sizeof(int) * lts);
-		ls[lts - 1] = 1;
-		ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);
-		ts[lts - 1][0] = ts[0][0] * 3;
-		lts++;
-		ts = realloc(ts, sizeof(int*) * lts);
-		ls = realloc(ls, sizeof(int) * lts);
-		ls[lts - 1] = 1;
-		ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);
-		ts[lts - 1][0] = ts[1][0] + 0;
-		x = ts[2][0];
-		while(y != 1)
-		{
-			printf("%d, %d, %d\n", x, y, z);
-			if(x == 27)
-			{
-				y = 1;
-				z = 2;
-			}
-			if(x != 27)
-			{
-				y = 0;
-				z = 1;
-				if(x < 27)
-				{
-					lts++;
-					ts = realloc(ts, sizeof(int*) * lts);
-					ls = realloc(ls, sizeof(int) * lts);
-					ls[lts - 1] = 1;
-					ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);
-					ts[lts - 1][0] = x + 1;
-					x = ts[3][0];
-				}
-				if(x > 27)
-				{
-					lts++;
-					ts = realloc(ts, sizeof(int*) * lts);
-					ls = realloc(ls, sizeof(int) * lts);
-					ls[lts - 1] = 1;
-					ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);
-					ts[lts - 1][0] = x - 1;
-					x = ts[4][0];
-				}
-			}
-		}
-		printf("%d, %d, %d\n", x, y, z);
+	int* a = NULL;
+	int* b = NULL;
+	int n;
+	lts++;
+	ts = realloc(ts, sizeof(int*) * lts);
+	ls = realloc(ls, sizeof(int) * lts);
+	ls[lts - 1] = 4;
+	ts[lts - 1] = malloc(sizeof(int)*ls[lts-1]);
+	memcpy(ts[lts - 1], (int[]){1, 2, 3, 4}, sizeof(int) * ls[lts - 1]);
+	a = realloc(a, sizeof(int) * ls[lts - 1]);
+	for(int i = 0; i < ls[lts - 1]; i++) {
+		a[i] = ts[lts - 1][i];
 	}
+	lts++;
+	ts = realloc(ts, sizeof(int*) * lts);
+	ls = realloc(ls, sizeof(int) * lts);
+	ls[lts - 1] = 3;
+	ts[lts - 1] = malloc(sizeof(int)*ls[lts-1]);
+	memcpy(ts[lts - 1], (int[]){1, 2, 3}, sizeof(int) * ls[lts - 1]);
+	lts++;
+	ts = realloc(ts, sizeof(int*) * lts);
+	ls = realloc(ls, sizeof(int) * lts);
+	ls[lts - 1] = div_arrays(a, 4, ts[1], 3, &(ts[lts - 1]));	b = realloc(b, sizeof(int) * ls[lts - 1]);
+	for(int i = 0; i < ls[lts - 1]; i++) {
+		b[i] = ts[lts - 1][i];
+	}
+	lts++;
+	ts = realloc(ts, sizeof(int*) * lts);
+	ls = realloc(ls, sizeof(int) * lts);
+	ls[lts - 1] = 4;
+	ts[lts - 1] = malloc(sizeof(int)*ls[lts-1]);
+	memcpy(ts[lts - 1], (int[]){1, 1, 1, 1}, sizeof(int) * ls[lts - 1]);
+	lts++;
+	ts = realloc(ts, sizeof(int*) * lts);
+	ls = realloc(ls, sizeof(int) * lts);
+	ls[lts - 1] = 1;
+	ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);
+	*ts[lts - 1] = dp_arrays(b, 4, ts[3], 4);
+	n = *ts[4];
+	printf("%d\n", n);
 
-	for(int i = 0; i < lts; i++) {
-		free(ts[i]);
-	}
+	free(a);
+	free(b);
+	free(ts[0]);
+	free(ts[1]);
+	free(ts[2]);
+	free(ts[3]);
 	free(ls);
 	free(ts);
 }
