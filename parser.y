@@ -8,15 +8,8 @@
     #include "stack.h"
 
     #define TYPE_LEN 4
-    #define LABEL_LEN 100
     #define TOKEN_LEN 100000
     #define YYINITDEPTH 10000
-    #define dbg
-    #ifdef dbg
-    #define YYDEBUG 1
-    #define YYERROR_VERBOSE
-    int yydebug = 1;
-    #endif
 
     extern int yylex();
     void error(char* s);
@@ -252,6 +245,7 @@ void begin_program() {
     fprintf(fp, "#include <malloc.h>\n");
     fprintf(fp, "#include <string.h>\n\n");
     
+    // Add arrays function
     tab_print(1);
     fprintf(fp, "int add_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
     tab_print(0);
@@ -279,6 +273,7 @@ void begin_program() {
     tab_print(-1);
     fprintf(fp, "}\n\n");
 
+    // Subtract arrays function
     tab_print(1);
     fprintf(fp, "int sub_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
     tab_print(0);
@@ -306,6 +301,7 @@ void begin_program() {
     tab_print(-1);
     fprintf(fp, "}\n\n");
 
+    // Multiply arrays function
     tab_print(1);
     fprintf(fp, "int mul_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
     tab_print(0);
@@ -333,6 +329,7 @@ void begin_program() {
     tab_print(-1);
     fprintf(fp, "}\n\n");
 
+    // Divide arrays function
     tab_print(1);
     fprintf(fp, "int div_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
     tab_print(0);
@@ -372,6 +369,7 @@ void begin_program() {
     tab_print(-1);
     fprintf(fp, "}\n\n");
     
+    // Dot product arrays function
     tab_print(1);
     fprintf(fp, "int dot_product_arrays(int *arr1, int len1, int *arr2, int len2) {\n");
 	tab_print(0);
@@ -387,6 +385,7 @@ void begin_program() {
     tab_print(-1);
     fprintf(fp, "}\n");
 
+    // Main start and common declarations
     fprintf(fp, "\n");
     tab_print(1);
     fprintf(fp, "int main() {\n");
@@ -404,7 +403,6 @@ void begin_block() {
 }
 
 void end_block() {
-    
     tab_print(-1);
     fprintf(fp, "}\n");
 }
@@ -465,24 +463,24 @@ void codegen_arithmetic() {
         if(m2.type == REL_OPERATOR) {
             sprintf(expVal, "%s %s %s", m1.token, m2.token, m3.token);
         } else {
-        tab_print(0);
-        fprintf(fp, "lts++;\n");
-        tab_print(0);
-        fprintf(fp, "ts = realloc(ts, sizeof(int*) * lts);\n");
-        tab_print(0);
-        fprintf(fp, "ls = realloc(ls, sizeof(int) * lts);\n");
-        tab_print(0);
-        fprintf(fp, "ls[%d] = 1;\n", lts);
-        tab_print(0);
-        fprintf(fp, "ts[%d] = malloc(sizeof(int) * ls[%d]);\n", lts, lts);
-        tab_print(0);
-        fprintf(fp, "ts[%d][0] = %s %s %s;\n", lts, m1.token, m2.token, m3.token);
-        Variable var;
-        sprintf(var.id, "ts[%d]", lts);
-        var.type = INT;
-        strcpy(var.arr_size, ls_last);
-        insert(NULL, var);
-        sprintf(expVal, "ts[%d][0]", lts++);
+            tab_print(0);
+            fprintf(fp, "lts++;\n");
+            tab_print(0);
+            fprintf(fp, "ts = realloc(ts, sizeof(int*) * lts);\n");
+            tab_print(0);
+            fprintf(fp, "ls = realloc(ls, sizeof(int) * lts);\n");
+            tab_print(0);
+            fprintf(fp, "ls[%d] = 1;\n", lts);
+            tab_print(0);
+            fprintf(fp, "ts[%d] = malloc(sizeof(int) * ls[%d]);\n", lts, lts);
+            tab_print(0);
+            fprintf(fp, "ts[%d][0] = %s %s %s;\n", lts, m1.token, m2.token, m3.token);
+            Variable var;
+            sprintf(var.id, "ts[%d]", lts);
+            var.type = INT;
+            strcpy(var.arr_size, ls_last);
+            insert(NULL, var);
+            sprintf(expVal, "ts[%d][0]", lts++);
         }
         push(NULL, expVal, INT);
         break;
@@ -715,7 +713,7 @@ void codegen_free() {
         get(NULL, &var, NULL, i);
         if (((var.id[0] == 't') && (var.id[1] == 's')) || var.type == ARRAY) {
             tab_print(0);
-            fprintf(fp, "free(%s);\n", var.id);   // free(x)
+            fprintf(fp, "free(%s);\n", var.id);
         }
     }
     tab_print(0);
