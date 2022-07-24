@@ -77,53 +77,14 @@ int main() {
 	int *ls = NULL;
 	int lts = 0;
 
-	int* a = NULL;
-	int* b = NULL;
-	int n;
+	int* fib = NULL;
 	lts++;
 	ts = realloc(ts, sizeof(int*) * lts);
 	ls = realloc(ls, sizeof(int) * lts);
-	ls[lts - 1] = 4;
+	ls[lts - 1] = 16;
 	ts[lts - 1] = malloc(sizeof(int)*ls[lts-1]);
-	memcpy(ts[lts - 1], (int[]){1, 2, 3, 4}, sizeof(int) * ls[lts - 1]);
-	a = realloc(a, sizeof(int) * ls[lts - 1]);
+	memcpy(ts[lts - 1], (int[]){0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610}, sizeof(int) * ls[lts - 1]);
+	fib = realloc(fib, sizeof(int) * ls[lts - 1]);
 	for(int i = 0; i < ls[lts - 1]; i++) {
-		a[i] = ts[lts - 1][i];
+		fib[i] = ts[lts - 1][i];
 	}
-	lts++;
-	ts = realloc(ts, sizeof(int*) * lts);
-	ls = realloc(ls, sizeof(int) * lts);
-	ls[lts - 1] = 3;
-	ts[lts - 1] = malloc(sizeof(int)*ls[lts-1]);
-	memcpy(ts[lts - 1], (int[]){1, 2, 3}, sizeof(int) * ls[lts - 1]);
-	lts++;
-	ts = realloc(ts, sizeof(int*) * lts);
-	ls = realloc(ls, sizeof(int) * lts);
-	ls[lts - 1] = div_arrays(a, 4, ts[1], 3, &(ts[lts - 1]));	b = realloc(b, sizeof(int) * ls[lts - 1]);
-	for(int i = 0; i < ls[lts - 1]; i++) {
-		b[i] = ts[lts - 1][i];
-	}
-	lts++;
-	ts = realloc(ts, sizeof(int*) * lts);
-	ls = realloc(ls, sizeof(int) * lts);
-	ls[lts - 1] = 4;
-	ts[lts - 1] = malloc(sizeof(int)*ls[lts-1]);
-	memcpy(ts[lts - 1], (int[]){1, 1, 1, 1}, sizeof(int) * ls[lts - 1]);
-	lts++;
-	ts = realloc(ts, sizeof(int*) * lts);
-	ls = realloc(ls, sizeof(int) * lts);
-	ls[lts - 1] = 1;
-	ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);
-	*ts[lts - 1] = dot_product_arrays(b, 4, ts[3], 4);
-	n = *ts[4];
-	printf("%d\n", n);
-
-	free(a);
-	free(b);
-	free(ts[0]);
-	free(ts[1]);
-	free(ts[2]);
-	free(ts[3]);
-	free(ls);
-	free(ts);
-}

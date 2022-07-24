@@ -8,7 +8,6 @@
     #include "stack.h"
 
     #define TYPE_LEN 4
-    #define LABEL_LEN 100
     #define TOKEN_LEN 100
     
     //#define dbg
@@ -38,6 +37,7 @@
     void codegen_const_arr();
     void codegen_if();
     void codegen_while();
+    void codegen_index();
     void codegen_free();
     void tab_print(int a);
     
@@ -88,10 +88,10 @@ declarator          : TYPE { strcpy(*type,yytext); } variable_list
 assignment          : variable_declared ASSIGN expression { codegen_assign(); }
                     ;
 
-conditional         : IF_COND cond IF_BLOCK { codegen_if(); } block
+conditional         : IF_COND PAR_BEGIN cond PAR_END IF_BLOCK { codegen_if(); } block
                     ;
 
-loop                : LOOP_COND cond LOOP_BLOCK { codegen_while(); } block
+loop                : LOOP_COND PAR_BEGIN cond PAR_END LOOP_BLOCK { codegen_while(); } block
                     ;
 
 print               : PRINT expression_list { codegen_print(); }
@@ -117,6 +117,7 @@ expression          : expression OP { push(NULL, yytext, OPERATOR); } expression
                     | variable_declared
                     | const_arr { codegen_const_arr(); }
                     | number
+                    | INDEX number { codegen_index(); }
                     ;      
 
 cond                : expression REL_OP { push(NULL, yytext, REL_OPERATOR); } expression { codegen_arithmetic(); }
@@ -413,9 +414,9 @@ void codegen_declare(char (*type)[TYPE_LEN], char var_name[TOKEN_LEN]) {
     // print variable to output
     tab_print(0);
     if (strcmp(*type, "arr") == 0) {
-        fprintf(fp, "int* %s = NULL;\n", yytext);  // arr x;
+        fprintf(fp, "int* %s = NULL;\n", yytext);
     } else {
-        fprintf(fp, "int %s;\n", yytext);  // int x;
+        fprintf(fp, "int %s;\n", yytext);
     }
 }
 
@@ -425,7 +426,7 @@ void codegen_assign() {
     pop(NULL, &var_name);
     if(var_name.type == INT) {
         tab_print(0);
-        fprintf(fp, "%s = %s;\n", var_name.token, exp.token);    // x = 5;
+        fprintf(fp, "%s = %s;\n", var_name.token, exp.token);
     } else {
         tab_print(0);
         fprintf(fp, "%s = realloc(%s, sizeof(int) * ls[lts - 1]);\n", var_name.token, var_name.token);
@@ -457,19 +458,20 @@ void codegen_arithmetic() {
         if(m2.type == REL_OPERATOR) {
             sprintf(expVal, "%s %s %s", m1.token, m2.token, m3.token);
         } else {
-        tab_print(0);
-        fprintf(fp, "lts++;\n");
-        tab_print(0);
-        fprintf(fp, "ts = realloc(ts, sizeof(int*) * lts);\n");
-        tab_print(0);
-        fprintf(fp, "ls = realloc(ls, sizeof(int) * lts);\n");
-        tab_print(0);
-        fprintf(fp, "ls[lts - 1] = 1;\n");
-        tab_print(0);
-        fprintf(fp, "ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);\n");
-        tab_print(0);
-        fprintf(fp, "ts[lts - 1][0] = %s %s %s;\n", m1.token, m2.token, m3.token);
-        sprintf(expVal, "ts[%d][0]", lts++);
+            tab_print(0);
+            fprintf(fp, "lts++;\n");
+            tab_print(0);
+            fprintf(fp, "ts = realloc(ts, sizeof(int*) * lts);\n");
+            tab_print(0);
+            fprintf(fp, "ls = realloc(ls, sizeof(int) * lts);\n");
+            tab_print(0);
+            fprintf(fp, "ls[lts - 1] = 1;\n");
+            tab_print(0);
+            fprintf(fp, "ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);\n");
+            tab_print(0);
+            fprintf(fp, "ts[lts - 1][0] = %s %s %s;\n", m1.token, m2.token, m3.token);
+            sprintf(expVal, "ts[lts - 1][0]");
+            lts++;
         }
         push(NULL, expVal, INT);
         break;
@@ -651,7 +653,7 @@ void codegen_print() {
     tab_print(0);
     fprintf(fp, "printf(\"%c%c", '%', 'd');
     for(int i = 1; i < expListCount; i++) {
-        printf(", %c%c", '%', 'd');
+        fprintf(fp, ", %c%c", '%', 'd');
     }
 
     fprintf(fp, "\\n\", %s);\n", expList.token);
@@ -670,6 +672,10 @@ void codegen_while() {
     pop(NULL, &cond);
     tab_print(0);
     fprintf(fp, "while(%s)\n", cond.token);
+}
+
+void codegen_index() {
+    
 }
 
 void codegen_free() {
