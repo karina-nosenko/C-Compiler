@@ -2,7 +2,8 @@
     "makefile.extensionOutputFolder": "./.vscode",
     "files.associations": {
         "*.tcc": "c",
-        "type_traits": "c"
+        "type_traits": "c",
+        "compare": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

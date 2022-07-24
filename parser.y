@@ -8,6 +8,7 @@
     #include "stack.h"
 
     #define TYPE_LEN 4
+    #define LABEL_LEN 100
     #define TOKEN_LEN 100
     
     //#define dbg
@@ -37,7 +38,6 @@
     void codegen_const_arr();
     void codegen_if();
     void codegen_while();
-    void codegen_index();
     void codegen_free();
     void tab_print(int a);
     
@@ -88,10 +88,10 @@ declarator          : TYPE { strcpy(*type,yytext); } variable_list
 assignment          : variable_declared ASSIGN expression { codegen_assign(); }
                     ;
 
-conditional         : IF_COND PAR_BEGIN cond PAR_END IF_BLOCK { codegen_if(); } block
+conditional         : IF_COND cond IF_BLOCK { codegen_if(); } block
                     ;
 
-loop                : LOOP_COND PAR_BEGIN cond PAR_END LOOP_BLOCK { codegen_while(); } block
+loop                : LOOP_COND cond LOOP_BLOCK { codegen_while(); } block
                     ;
 
 print               : PRINT expression_list { codegen_print(); }
@@ -117,7 +117,6 @@ expression          : expression OP { push(NULL, yytext, OPERATOR); } expression
                     | variable_declared
                     | const_arr { codegen_const_arr(); }
                     | number
-                    | variable_declared INDEX number { codegen_index(); }
                     ;      
 
 cond                : expression REL_OP { push(NULL, yytext, REL_OPERATOR); } expression { codegen_arithmetic(); }
@@ -141,10 +140,13 @@ int main(void) {
 
     fp = fopen("output.c", "w");
 
+    char zero[TOKEN_LEN];
+    sprintf(zero, "%d", 0);
+
     table.size = 0;
     insert(&table, (Variable){0});
     get(&table, NULL, NULL, 0);
-    update(&table, NULL, 0);
+    update(&table, NULL, zero);
     find(&table, NULL);
     size(&table);
 
@@ -224,16 +226,16 @@ void gen_const_arr() {
 }
 
 void declare(char (*type)[4], char var_name[TOKEN_LEN]) {
-    Variable var;
-    bool isInt = strcmp(*type, "int") == 0;
+    // Variable var;
+    // bool isInt = strcmp(*type, "int") == 0;
     
-    assert_var_status(var_name, false);
+    // assert_var_status(var_name, false);
 
-    strcpy(var.id, var_name);
-    var.type = isInt;
-    var.arr_size = isInt;
+    // strcpy(var.id, var_name);
+    // var.type = isInt;
+    // strcpy(var.arr_size, var_name); //
 
-    insert(NULL, var);
+    // insert(NULL, var);
 }
 
 /* CODE GENERATORS */
@@ -408,10 +410,8 @@ void end_program() {
 }
 
 void codegen_declare(char (*type)[TYPE_LEN], char var_name[TOKEN_LEN]) {
-    // add variable to variable table
     declare(type, var_name);
 
-    // print variable to output
     tab_print(0);
     if (strcmp(*type, "arr") == 0) {
         fprintf(fp, "int* %s = NULL;\n", yytext);
@@ -436,186 +436,185 @@ void codegen_assign() {
         fprintf(fp, "%s[i] = ts[lts - 1][i];\n", var_name.token);
         tab_print(-1);
         fprintf(fp, "}\n");
-        update(NULL, var_name.token, ls_last);
+        //update(NULL, var_name.token, ls_last);
     }
 }
 
 void codegen_arithmetic() {
-    StackMember m1, m2, m3;
-    char expVal[TOKEN_LEN];
+    // StackMember m1, m2, m3;
+    // char expVal[TOKEN_LEN];
 
-    pop(NULL, &m3);
-    pop(NULL, &m2);
-    pop(NULL, &m1);
+    // pop(NULL, &m3);
+    // pop(NULL, &m2);
+    // pop(NULL, &m1);
     
-    if((m1.type != m3.type) || (m1.type == m3.type && m2.type == REL_OPERATOR && m1.type != INT)) {
-        error("Type Mismatch.");
-        exit(1);
-    }
+    // if((m1.type != m3.type) || (m1.type == m3.type && m2.type == REL_OPERATOR && m1.type != INT)) {
+    //     error("Type Mismatch.");
+    //     exit(1);
+    // }
     
-    switch(m1.type) {
-    case INT:
-        if(m2.type == REL_OPERATOR) {
-            sprintf(expVal, "%s %s %s", m1.token, m2.token, m3.token);
-        } else {
-            tab_print(0);
-            fprintf(fp, "lts++;\n");
-            tab_print(0);
-            fprintf(fp, "ts = realloc(ts, sizeof(int*) * lts);\n");
-            tab_print(0);
-            fprintf(fp, "ls = realloc(ls, sizeof(int) * lts);\n");
-            tab_print(0);
-            fprintf(fp, "ls[lts - 1] = 1;\n");
-            tab_print(0);
-            fprintf(fp, "ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);\n");
-            tab_print(0);
-            fprintf(fp, "ts[lts - 1][0] = %s %s %s;\n", m1.token, m2.token, m3.token);
-            sprintf(expVal, "ts[lts - 1][0]");
-            lts++;
-        }
-        push(NULL, expVal, INT);
-        break;
-    case ARR:
-        int l1, l3;
-        switch(m2.token[0]) {
-            case '+':
-                strcpy(m2.token, "add");
-                break;
-            case '-':
-                strcpy(m2.token, "sub");
-                break;
-            case '*':
-                strcpy(m2.token, "mul");
-                break;
-            case '/':
-                strcpy(m2.token, "div");
-                break;
-        }
-        if(isConstArray(m1.token)) {
-            l1 = getConstArrSize(m1.token);
-            push(NULL, m1.token, m1.type);
-            codegen_const_arr();
-            pop(NULL, &m1);
-        } else {
-            Variable var;
-            get(NULL, &var, m1.token, 0);
-            l1 = var.arr_size;
-        }
-        if(isConstArray(m3.token)) {
-            l3 = getConstArrSize(m3.token);
-            push(NULL, m3.token, m3.type);
-            codegen_const_arr();
-            pop(NULL, &m3);
-        } else {
-            Variable var;
-            get(NULL, &var, m3.token, 0);
-            l3 = var.arr_size;
-        }
-        tab_print(0);
-        fprintf(fp, "lts++;\n");
-        tab_print(0);
-        fprintf(fp, "ts = realloc(ts, sizeof(int*) * lts);\n");
-        tab_print(0);
-        fprintf(fp, "ls = realloc(ls, sizeof(int) * lts);\n");
-        tab_print(0);
-        fprintf(fp, "ls[lts - 1] = %s_arrays(%s, %d, %s, %d, &(ts[lts - 1]));", m2.token, m1.token, l1, m3.token, l3);
-        ls_last = ((l1 > l3) ? l1 : l3);
-        Variable var;
-        sprintf(var.id, "ts[%d]", lts);
-        var.type = ARRAY;
-        var.arr_size = ls_last;
-        insert(NULL, var);
-        sprintf(expVal, "ts[%d]", lts++);
-        push(NULL, expVal, INT);
-        break;
-    case OPERATOR:
-        push(NULL, m2.token, m2.type);
-        break;
-    }
+    // switch(m1.type) {
+    // case INT:
+    //     if(m2.type == REL_OPERATOR) {
+    //         sprintf(expVal, "%s %s %s", m1.token, m2.token, m3.token);
+    //     } else {
+    //     tab_print(0);
+    //     fprintf(fp, "lts++;\n");
+    //     tab_print(0);
+    //     fprintf(fp, "ts = realloc(ts, sizeof(int*) * lts);\n");
+    //     tab_print(0);
+    //     fprintf(fp, "ls = realloc(ls, sizeof(int) * lts);\n");
+    //     tab_print(0);
+    //     fprintf(fp, "ls[lts - 1] = 1;\n");
+    //     tab_print(0);
+    //     fprintf(fp, "ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);\n");
+    //     tab_print(0);
+    //     fprintf(fp, "ts[lts - 1][0] = %s %s %s;\n", m1.token, m2.token, m3.token);
+    //     sprintf(expVal, "ts[%d][0]", lts++);
+    //     }
+    //     push(NULL, expVal, INT);
+    //     break;
+    // case ARR:
+    //     int l1, l3;
+    //     switch(m2.token[0]) {
+    //         case '+':
+    //             strcpy(m2.token, "add");
+    //             break;
+    //         case '-':
+    //             strcpy(m2.token, "sub");
+    //             break;
+    //         case '*':
+    //             strcpy(m2.token, "mul");
+    //             break;
+    //         case '/':
+    //             strcpy(m2.token, "div");
+    //             break;
+    //     }
+    //     if(isConstArray(m1.token)) {
+    //         l1 = getConstArrSize(m1.token);
+    //         push(NULL, m1.token, m1.type);
+    //         codegen_const_arr();
+    //         pop(NULL, &m1);
+    //     } else {
+    //         Variable var;
+    //         get(NULL, &var, m1.token, 0);
+    //         l1 = var.arr_size;
+    //     }
+    //     if(isConstArray(m3.token)) {
+    //         l3 = getConstArrSize(m3.token);
+    //         push(NULL, m3.token, m3.type);
+    //         codegen_const_arr();
+    //         pop(NULL, &m3);
+    //     } else {
+    //         Variable var;
+    //         get(NULL, &var, m3.token, 0);
+    //         l3 = var.arr_size;
+    //     }
+    //     tab_print(0);
+    //     fprintf(fp, "lts++;\n");
+    //     tab_print(0);
+    //     fprintf(fp, "ts = realloc(ts, sizeof(int*) * lts);\n");
+    //     tab_print(0);
+    //     fprintf(fp, "ls = realloc(ls, sizeof(int) * lts);\n");
+    //     tab_print(0);
+    //     fprintf(fp, "ls[lts - 1] = %s_arrays(%s, %d, %s, %d, &(ts[lts - 1]));", m2.token, m1.token, l1, m3.token, l3);
+    //     ls_last = ((l1 > l3) ? l1 : l3);
+    //     Variable var;
+    //     sprintf(var.id, "ts[%d]", lts);
+    //     var.type = ARRAY;
+    //     var.arr_size = ls_last;
+    //     insert(NULL, var);
+    //     sprintf(expVal, "ts[%d]", lts++);
+    //     push(NULL, expVal, INT);
+    //     break;
+    // case OPERATOR:
+    //     push(NULL, m2.token, m2.type);
+    //     break;
+    // }
 }
 
 void codegen_dotproduct() {
-    StackMember m1, m3;
-    int l1 = 0, l3 = 0;
-    char expVal[TOKEN_LEN];
+    // StackMember m1, m3;
+    // int l1 = 0, l3 = 0;
+    // char expVal[TOKEN_LEN];
 
-    pop(NULL, &m3);
-    pop(NULL, &m1);
+    // pop(NULL, &m3);
+    // pop(NULL, &m1);
     
-    if((m1.type != m3.type) || (m1.type != ARR)) {
-        error("Type Mismatch.");
-        exit(1);
-    }
-    if(isConstArray(m1.token)) {
-        l1 = getConstArrSize(m1.token);
-        push(NULL, m1.token, m1.type);
-        codegen_const_arr();
-        pop(NULL, &m1);
-    } else {
-        Variable var;
-        get(NULL, &var, m1.token, 0);
-        l1 = var.arr_size;
-    }
-    if(isConstArray(m3.token)) {
-        fprintf(stderr, "m3 const\n");
-        l3 = getConstArrSize(m3.token);
-        push(NULL, m3.token, m3.type);
-        codegen_const_arr();
-        pop(NULL, &m3);
-    } else {
-        Variable var;
-        get(NULL, &var, m3.token, 0);
-        l3 = var.arr_size;
-    }
-    tab_print(0);
-    fprintf(fp, "lts++;\n");
-    tab_print(0);
-    fprintf(fp, "ts = realloc(ts, sizeof(int*) * lts);\n");
-    tab_print(0);
-    fprintf(fp, "ls = realloc(ls, sizeof(int) * lts);\n");
-    tab_print(0);
-    fprintf(fp, "ls[lts - 1] = 1;\n");
-    tab_print(0);
-    fprintf(fp, "ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);\n");
-    tab_print(0);
-    fprintf(fp, "*ts[lts - 1] = dot_product_arrays(%s, %d, %s, %d);\n", m1.token, l1, m3.token, l3);
-    Variable var;
-    sprintf(var.id, "ts[%d]", lts);
-    var.type = INTEGER;
-    ls_last = var.arr_size = 1;
-    insert(NULL, var);
-    sprintf(expVal, "*ts[%d]", lts++);
-    push(NULL, expVal, INT);
+    // if((m1.type != m3.type) || (m1.type != ARR)) {
+    //     error("Type Mismatch.");
+    //     exit(1);
+    // }
+    // if(isConstArray(m1.token)) {
+    //     l1 = getConstArrSize(m1.token);
+    //     push(NULL, m1.token, m1.type);
+    //     codegen_const_arr();
+    //     pop(NULL, &m1);
+    // } else {
+    //     Variable var;
+    //     get(NULL, &var, m1.token, 0);
+    //     l1 = var.arr_size;
+    // }
+    // if(isConstArray(m3.token)) {
+    //     fprintf(stderr, "m3 const\n");
+    //     l3 = getConstArrSize(m3.token);
+    //     push(NULL, m3.token, m3.type);
+    //     codegen_const_arr();
+    //     pop(NULL, &m3);
+    // } else {
+    //     Variable var;
+    //     get(NULL, &var, m3.token, 0);
+    //     l3 = var.arr_size;
+    // }
+    // tab_print(0);
+    // fprintf(fp, "lts++;\n");
+    // tab_print(0);
+    // fprintf(fp, "ts = realloc(ts, sizeof(int*) * lts);\n");
+    // tab_print(0);
+    // fprintf(fp, "ls = realloc(ls, sizeof(int) * lts);\n");
+    // tab_print(0);
+    // fprintf(fp, "ls[lts - 1] = 1;\n");
+    // tab_print(0);
+    // fprintf(fp, "ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);\n");
+    // tab_print(0);
+    // fprintf(fp, "*ts[lts - 1] = dot_product_arrays(%s, %d, %s, %d);\n", m1.token, l1, m3.token, l3);
+    // Variable var;
+    // sprintf(var.id, "ts[%d]", lts);
+    // var.type = INTEGER;
+    // ls_last = var.arr_size = 1;
+    // insert(NULL, var);
+    // sprintf(expVal, "*ts[%d]", lts++);
+    // push(NULL, expVal, INT);
 }
 
 void codegen_const_arr() {
-    StackMember m;
-    Variable var;
-    pop(NULL, &m);
+    // StackMember m;
+    // Variable var;
+    // pop(NULL, &m);
 
-    char temp[TOKEN_LEN] = {0};
-    strncpy(temp, m.token + 1, strlen(m.token) - 2);
+    // char temp[TOKEN_LEN] = {0};
+    // strncpy(temp, m.token + 1, strlen(m.token) - 2);
     
-    sprintf(var.id, "ts[%d]", lts);
-    var.type = ARRAY;
-    ls_last = var.arr_size = getConstArrSize(m.token);
-    insert(NULL, var);
+    // sprintf(var.id, "ts[%d]", lts);
+    // var.type = ARRAY;
+    // ls_last = var.arr_size = getConstArrSize(m.token);
+    // insert(NULL, var);
 
-    tab_print(0);
-    fprintf(fp, "lts++;\n");
-    tab_print(0);
-    fprintf(fp, "ts = realloc(ts, sizeof(int*) * lts);\n");
-    tab_print(0);
-    fprintf(fp, "ls = realloc(ls, sizeof(int) * lts);\n");
-    tab_print(0);
-    fprintf(fp, "ls[lts - 1] = %d;\n", var.arr_size);
-    tab_print(0);
-    fprintf(fp, "ts[lts - 1] = malloc(sizeof(int)*ls[lts-1]);\n");
-    tab_print(0);
-    fprintf(fp, "memcpy(ts[lts - 1], (int[]){%s}, sizeof(int) * ls[lts - 1]);\n", temp);
-    sprintf(m.token, "ts[%d]", lts++);
+    // tab_print(0);
+    // fprintf(fp, "lts++;\n");
+    // tab_print(0);
+    // fprintf(fp, "ts = realloc(ts, sizeof(int*) * lts);\n");
+    // tab_print(0);
+    // fprintf(fp, "ls = realloc(ls, sizeof(int) * lts);\n");
+    // tab_print(0);
+    // fprintf(fp, "ls[lts - 1] = %d;\n", var.arr_size);
+    // tab_print(0);
+    // fprintf(fp, "ts[lts - 1] = malloc(sizeof(int)*ls[lts-1]);\n");
+    // tab_print(0);
+    // fprintf(fp, "memcpy(ts[lts - 1], (int[]){%s}, sizeof(int) * ls[lts - 1]);\n", temp);
+    // sprintf(m.token, "ts[%d]", lts++);
 
-    push(NULL, m.token, m.type);
+    // push(NULL, m.token, m.type);
 }
 
 void codegen_expList() {
@@ -624,18 +623,18 @@ void codegen_expList() {
         StackMember exp1, exp2;
         pop(NULL, &exp2);
         pop(NULL, &exp1);
-        // if(exp2.type == ARR) {
-        //     error("can\'t print array like this, please use a loop.");
-        //     exit(1);
-        // }
+        if(exp2.type == ARR) {
+            error("can\'t print array like this, please use a loop.");
+            exit(1);
+        }
         sprintf(expVal, "%s, %s", exp1.token, exp2.token);
     } else {
         StackMember exp;
         pop(NULL, &exp);
-        // if(exp.type == ARR) {
-        //     error("can\'t print array like this, please use a loop.");
-        //     exit(1);
-        // }
+        if(exp.type == ARR) {
+            error("can\'t print array like this, please use a loop.");
+            exit(1);
+        }
         sprintf(expVal, "%s", exp.token);
     }
     push(NULL, expVal, EXP_LIST);
@@ -653,7 +652,7 @@ void codegen_print() {
     tab_print(0);
     fprintf(fp, "printf(\"%c%c", '%', 'd');
     for(int i = 1; i < expListCount; i++) {
-        fprintf(fp, ", %c%c", '%', 'd');
+        printf(", %c%c", '%', 'd');
     }
 
     fprintf(fp, "\\n\", %s);\n", expList.token);
@@ -674,31 +673,20 @@ void codegen_while() {
     fprintf(fp, "while(%s)\n", cond.token);
 }
 
-void codegen_index() {
-    StackMember index;
-    StackMember var;
-    pop(NULL, &index);
-    pop(NULL, &var);
-
-    fprintf(stderr, "index: %s\n", index.token);
-    fprintf(stderr, "var: %s\n", index.token);
-
-}
-
 void codegen_free() {
-    int tSize = size(NULL);
-    Variable var;
-    for(int i=0; i < tSize; i++) {
-        get(NULL, &var, NULL, i);
-        if ((var.type == ARRAY) && var.arr_size > 0) {
-            tab_print(0);
-            fprintf(fp, "free(%s);\n", var.id);   // free(x)
-        }
-    }
-    tab_print(0);
-    fprintf(fp, "free(ls);\n");
-    tab_print(0);
-    fprintf(fp, "free(ts);\n");
+    // int tSize = size(NULL);
+    // Variable var;
+    // for(int i=0; i < tSize; i++) {
+    //     get(NULL, &var, NULL, i);
+    //     if ((var.type == ARRAY) && var.arr_size > 0) {
+    //         tab_print(0);
+    //         fprintf(fp, "free(%s);\n", var.id);   // free(x)
+    //     }
+    // }
+    // tab_print(0);
+    // fprintf(fp, "free(ls);\n");
+    // tab_print(0);
+    // fprintf(fp, "free(ts);\n");
 }
 
 void tab_print(int a) {
