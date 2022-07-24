@@ -4,135 +4,165 @@
     #include <ctype.h>
     #include <string.h>
     #include <stdbool.h>
+    #include "symbol_table.h"
+    #include "stack.h"
 
     #define TYPE_LEN 4
     #define LABEL_LEN 100
     #define TOKEN_LEN 100
-    #define TABLE_SIZE 10000
-    #define STACK_SIZE 1000
-    enum token_type { INTEGER, ARRAY };
+    
+    //#define dbg
+    #ifdef dbg
+    #define YYDEBUG 1
+    #define YYERROR_VERBOSE
+    int yydebug = 1;
+    #endif
 
-    void yyerror(char* s);
-    int yylex();
-    void addSymbolToTable(char id[TOKEN_LEN], char type[TYPE_LEN], int arr_size);
-    void setType();
-    bool isInteger(char token[TOKEN_LEN]);
-    bool isConstArray(char token[TOKEN_LEN]);
-    int getConstArrSize(char array[TOKEN_LEN]);
-    enum token_type getType(char token[TOKEN_LEN]);
-    struct Table* findVar(char variableName[TOKEN_LEN]);
-    bool isVarDeclared(char variableName[TOKEN_LEN]);
-    void assertVarDeclared();
-    void declare();
-    void push();
-    void codegen_declare();
+    extern int yylex();
+
+    void yyerror(char (*type)[TYPE_LEN], char* s);
+    TokenType assert_var_status(char var_name[TOKEN_LEN], bool required);
+    void combine_numbers();
+    void gen_empty_arr();
+    void gen_const_arr();
+    void begin_program();
+    void begin_block();
+    void end_block();
+    void end_program();
+    void codegen_declare(char (*type)[TYPE_LEN], char var_name[TOKEN_LEN]);
     void codegen_assign();
+    void codegen_expList();
+    void codegen_print();
     void codegen_arithmetic();
-    void codegen_relop();
+    void codegen_dotproduct();
+    void codegen_const_arr();
+    void codegen_if();
+    void codegen_while();
     void codegen_free();
-
+    void tab_print(int a);
+    
     extern char *yytext;
+
+    int expListCount = 0;
+    int lts = 0;
+    int ls_last = 0;
 %}
 
 %start program
-%token BEGIN_KWD END INT ARR
-%token NUMBER
+%token BEGIN_KWD END
+%token TYPE
+%token IF_COND IF_BLOCK
+%token LOOP_COND LOOP_BLOCK
+%token PRINT
+%token SEMICOLON INDEX COMMA
+%token PAR_BEGIN PAR_END
+%token CONST_ARR_BEGIN CONST_ARR_END
+%token INT_VAL
 %token IDENTIFIER
-%token CONST_ARR
-%token LE GE EQ NE GT LT
-%right '=' 
-%left EQ NE 
-%left LE GE LT GT
-%left '+' '-' 
-%left '*' '/' '@'
+%left OP DOT_OP REL_OP
+%right ASSIGN
+%parse-param {char (*type)[4]}
 
 %%
-program             : { printf("#include <stdio.h>\n#include <stdlib.h>\n\nint main()\n"); }  block   { return 0; }
-
-block               : BEGIN_KWD { printf("{\n"); } statement_list END { codegen_free(); printf("}\n"); }
-
-statement_list      : /* empty */                               
-                    | statement_list statement                  
-                    ;       
-
-statement           : declarator ';'                                        
-                    | assignment_list ';'                                       
-                    ;       
-
-declarator          : type { setType(); } IDENTIFIER { declare(); push(); codegen_declare(); } variable_list
-
-variable_list       : /* empty */  
-                    | ',' IDENTIFIER { declare(); push(); codegen_declare(); } variable_list
+program             : BEGIN_KWD { begin_program(); } statement_list END { end_program(); return 0; }
                     ;
 
-assignment_list     : assignment                                
-                    | assignment_list ',' assignment            
+block               : BEGIN_KWD { begin_block(); } statement_list END { end_block(); }
                     ;
 
-assignment          : IDENTIFIER { assertVarDeclared(); push(); } '=' { push(); } expression { codegen_assign(); }
-                    ;                
-
-expression          : expression '+' { push(); } expression { codegen_arithmetic(); }                        
-                    | expression '-' { push(); } expression { codegen_arithmetic(); }                       
-                    | expression '*' { push(); } expression { codegen_arithmetic(); }                       
-                    | expression '/' { push(); } expression { codegen_arithmetic(); }
-                    | expression LT { push(); } expression { codegen_relop(); }
-                    | expression LE { push(); } expression { codegen_relop(); }
-                    | expression GT { push(); } expression { codegen_relop(); }
-                    | expression GE { push(); } expression { codegen_relop(); }
-                    | expression NE { push(); } expression { codegen_relop(); }
-                    | expression EQ { push(); } expression { codegen_relop(); }
-                    | '(' expression ')'
-                    | IDENTIFIER { assertVarDeclared(); push(); }
-                    | NUMBER { push(); }
-                    | CONST_ARR { push(); }
+statement_list      : statement                               
+                    | statement statement_list
                     ;       
 
-type                : INT                                       
-                    | ARR
+statement           : declarator SEMICOLON
+                    | assignment SEMICOLON
+                    | print SEMICOLON
+                    | conditional
+                    | loop
+                    ;       
+
+declarator          : TYPE { strcpy(*type,yytext); } variable_list
+                    ;
+
+assignment          : variable_declared ASSIGN expression { codegen_assign(); }
+                    ;
+
+conditional         : IF_COND cond IF_BLOCK { codegen_if(); } block
+                    ;
+
+loop                : LOOP_COND cond LOOP_BLOCK { codegen_while(); } block
+                    ;
+
+print               : PRINT expression_list { codegen_print(); }
+                    ;
+
+variable_list       : variable_declare 
+                    | variable_declare COMMA variable_list
+                    ;
+
+expression_list     : expression { codegen_expList(); }
+                    | expression COMMA { codegen_expList(); } expression_list
+                    ;
+
+variable_declare    : IDENTIFIER { codegen_declare(type, yytext); }
+                    ;
+
+variable_declared   : IDENTIFIER { push(NULL, yytext, assert_var_status(yytext, true)); }
+                    ;
+
+expression          : expression OP { push(NULL, yytext, OPERATOR); } expression { codegen_arithmetic(); }
+                    | expression DOT_OP expression { codegen_dotproduct(); }
+                    | PAR_BEGIN { push(NULL, yytext, OPERATOR); } expression PAR_END { push(NULL, yytext, OPERATOR); codegen_arithmetic(); }
+                    | variable_declared
+                    | const_arr { codegen_const_arr(); }
+                    | number
+                    ;      
+
+cond                : expression REL_OP { push(NULL, yytext, REL_OPERATOR); } expression { codegen_arithmetic(); }
+                    ;
+
+number              : INT_VAL { push(NULL, yytext, INT); }
+                    ;
+numbers             : number
+                    | number COMMA numbers { combine_numbers(); }
+                    ;
+
+const_arr           : CONST_ARR_BEGIN CONST_ARR_END { gen_empty_arr(); }
+                    | CONST_ARR_BEGIN numbers CONST_ARR_END { gen_const_arr(); }
                     ;
 %%
-int label[LABEL_LEN];
-
-struct Table
-{
-	char id[TOKEN_LEN];
-	char type[TYPE_LEN];
-    int arr_size;   // size of the array if the type is arr
-} table[TABLE_SIZE];
-int tableCurrentIndex = 0;
-char type[TYPE_LEN];
-
-char st[STACK_SIZE][TOKEN_LEN];
-int top=0;
-
-// for temporary variable names
-char temp[TOKEN_LEN]="t";
-int token_index = 0;
 
 int main(void) {
-    return yyparse();
+    Table table;
+    Stack stack;
+    char type[TYPE_LEN];
+
+    table.size = 0;
+    insert(&table, (Variable){0});
+    get(&table, NULL, NULL, 0);
+    update(&table, NULL, 0);
+    find(&table, NULL);
+    size(&table);
+
+    stack.top = -1;
+    push(&stack, NULL, EXP_LIST);
+    pop(&stack, NULL);
+
+    return yyparse(&type);
 }
 
-void yyerror(char *s) {
+void yyerror(char (*type)[TYPE_LEN], char* s) {
 	fprintf(stderr, "error: %s\n", s);
 }
 
-/* SYMBOL TABLE */
-
-void addSymbolToTable(char id[TOKEN_LEN], char type[TYPE_LEN], int arr_size) {
-    strcpy(table[tableCurrentIndex].id, id);
-    strcpy(table[tableCurrentIndex].type, type);
-    table[tableCurrentIndex].arr_size = arr_size;
-    tableCurrentIndex++;
+void error(char* s) {
+    yyerror(NULL, s);
 }
 
-void setType() {
-	strcpy(type,yytext);
-}
+/////////////
 
 bool isInteger(char token[TOKEN_LEN]) {
-    for(int i=0; token[i] != '\0'; i++) {
+    for(int i = (token[0] == '-'); i < TOKEN_LEN && token[i] != '\0'; i++) {
         if (!isdigit(token[i])) {
             return false;
         }
@@ -141,182 +171,517 @@ bool isInteger(char token[TOKEN_LEN]) {
 }
 
 bool isConstArray(char token[TOKEN_LEN]) {
-    int size = 0;
-    for(int i=0; i<TOKEN_LEN && token[i] != '\0'; i++) {
-        size++;
-    }
-
-    if (token[0] == '[' && token[size-1] == ']') {
-        return true;
-    }
-    return false;
+    return (token[0] == '[' && token[strnlen_s(token, TOKEN_LEN) - 1] == ']');
 }
-
+//TODO
 int getConstArrSize(char array[TOKEN_LEN]) {
-    bool empty = true;
-    bool oneElement = true;
-    int numOfCommas = 0;
-    for(int i=1; i<TOKEN_LEN && array[i]!='\0' && array[i]!=']'; i++) {
-        if (isdigit(array[i])) {
-            empty = false;
-        }
-        if (array[i] == ',') {
-            oneElement = false;
-            numOfCommas++;
-        }
+    int elementCount = 0;
+    bool began = false;
+    while(strtok(((!began) ? array : NULL), ", []{}")) {
+        began = true;
+        elementCount++;
     }
+    return elementCount;
+}
 
-    if (empty) {
+TokenType assert_var_status(char var_name[TOKEN_LEN], bool required) {
+    if((find(NULL, var_name) >= 0) != required) {
+        char errorMsg[TOKEN_LEN];
+        sprintf(errorMsg, "Variable %s %s.\n", var_name, (required ? " not declared" : " already declared."));
+        error(errorMsg);
+        exit(1);
+    } else if(!required) {
         return 0;
-    } else if (oneElement) {
-        return 1;
-    } else {
-        return numOfCommas + 1;
     }
+    Variable var;
+    get(NULL, &var, var_name, 0);
+    return var.type;
 }
 
-enum token_type getType(char token[TOKEN_LEN]) {
-    if (isInteger(token)) {
-        return INTEGER;
-    } else if (isConstArray(token)) {
-        return ARRAY;
-    } else {
-        struct Table* variable = findVar(token);
-        if(variable) {
-            return strcmp(variable->type, "arr") == 0 ? ARRAY : INTEGER;
-        } else {
-            yyerror("Unknown type.");
-		    exit(0);
-        }
-    }
+void combine_numbers() {
+    char expVal[TOKEN_LEN];
+    StackMember m1, m2;
+    pop(NULL, &m2);
+    pop(NULL, &m1);
+    sprintf(expVal, "%s, %s", m1.token, m2.token);
+    push(NULL, expVal, INT);
 }
 
-struct Table* findVar(char variableName[TOKEN_LEN]) {
-    for(int i=0; i<tableCurrentIndex; i++) {
-        if (strcmp(table[i].id, variableName) == 0) {
-            return &table[i];
-        }
-    }
-    return NULL;
+void gen_empty_arr() {
+    char expVal[TOKEN_LEN];
+    sprintf(expVal, "[]");
+    push(NULL, expVal, ARR);
 }
 
-bool isVarDeclared(char variableName[TOKEN_LEN]) {
-    for(int i=0; i<tableCurrentIndex; i++) {
-        if (strcmp(table[i].id, variableName) == 0) {
-            return true;
-        }
-    }
-    return false;
+void gen_const_arr() {
+    char expVal[TOKEN_LEN];
+    StackMember m;
+    pop(NULL, &m);
+    sprintf(expVal, "[%s]", m.token);
+    push(NULL, expVal, ARR);
 }
 
-void assertVarDeclared() {
-    if(!isVarDeclared(yytext)) {
-        yyerror("Variable not declared");
-		exit(0);
-    }
-}
+void declare(char (*type)[4], char var_name[TOKEN_LEN]) {
+    Variable var;
+    bool isInt = strcmp(*type, "int") == 0;
+    
+    assert_var_status(var_name, false);
 
-void declare() {
-    char variableName[TOKEN_LEN];
-    strcpy(variableName, yytext);
+    strcpy(var.id, var_name);
+    var.type = isInt;
+    var.arr_size = isInt;
 
-    if (isVarDeclared(variableName)) {
-        yyerror("Multiple variable name declarations");
-        exit(0);
-    }
-
-    addSymbolToTable(variableName, type, 0);
-}
-
-/* STACK */
-
-void push() {
-    strcpy(st[++top], yytext);
+    // add var to table
+    insert(NULL, var);
 }
 
 /* CODE GENERATORS */
 
-void codegen_declare() {
-    if (strcmp(type, "arr") == 0) {
-        printf("\tint* %s;\n", st[top--]);  // arr x;
+void begin_program() {
+    printf("#include <stdio.h>\n");
+    printf("#include <malloc.h>\n");
+    printf("#include <string.h>\n");
+    
+    tab_print(1);
+    printf("int add_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
+    tab_print(0);
+    printf("int i, min, max;\n");
+    tab_print(0);
+    printf("min = (len1 < len2) ? len1 : len2;\n");
+    tab_print(0);
+    printf("max = (len1 > len2) ? len1 : len2;\n");
+    tab_print(0);
+    printf("*total = malloc(sizeof(int) * max);\n");
+    tab_print(1);
+    printf("for(i = 0; i < min; i++) {\n");  
+    tab_print(0);
+    printf("(*total)[i] = arr1[i] + arr2[i];\n");
+    tab_print(-1);
+    printf("}\n");
+    tab_print(1);
+    printf("for(int *pMax = ((len1 > len2) ? arr1 : arr2);i < max; i++) {\n");
+    tab_print(0);
+    printf("(*total)[i] = pMax[i];\n");
+    tab_print(-1);
+    printf("}\n");
+    tab_print(0);
+    printf("return max;\n");
+    tab_print(-1);
+    printf("}\n");
+
+    tab_print(1);
+    printf("int sub_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
+    tab_print(0);
+    printf("int i, min, max;\n");
+    tab_print(0);
+    printf("min = (len1 < len2) ? len1 : len2;\n");
+    tab_print(0);
+    printf("max = (len1 > len2) ? len1 : len2;\n");
+    tab_print(0);
+    printf("*total = malloc(sizeof(int) * max);\n");
+    tab_print(1);
+    printf("for(i = 0; i < min; i++) {\n");
+    tab_print(0);
+    printf("(*total)[i] = arr1[i] - arr2[i];\n");
+    tab_print(-1);
+    printf("}\n");
+    tab_print(1);
+    printf("for(int *pMax = ((len1 > len2) ? arr1 : arr2);i < max; i++) {\n");
+    tab_print(0);
+    printf("(*total)[i] = pMax[i] * ((len1 > len2) ? 1 : -1);\n");
+    tab_print(-1);
+    printf("}\n");
+    tab_print(0);
+    printf("return max;\n");
+    tab_print(-1);
+    printf("}\n");
+
+    tab_print(1);
+    printf("int mul_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
+    tab_print(0);
+    printf("int i, min, max;\n");
+    tab_print(0);
+    printf("min = (len1 < len2) ? len1 : len2;\n");
+    tab_print(0);
+    printf("max = (len1 > len2) ? len1 : len2;\n");
+    tab_print(0);
+    printf("*total = malloc(sizeof(int) * max);\n");
+    tab_print(1);
+    printf("for(i = 0; i < min; i++) {\n");
+    tab_print(0);
+    printf("(*total)[i] = arr1[i] * arr2[i];\n");
+    tab_print(-1);
+    printf("}\n");
+    tab_print(1);
+    printf("for(;i < max; i++) {\n");
+    tab_print(0);
+    printf("(*total)[i] = 0;\n");
+    tab_print(-1);
+    printf("}\n");
+    tab_print(0);
+    printf("return max;\n");
+    tab_print(-1);
+    printf("}\n");
+
+    tab_print(1);
+    printf("int div_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
+    tab_print(0);
+    printf("int i, min, max;\n");
+    tab_print(0);
+    printf("min = (len1 < len2) ? len1 : len2;\n");
+    tab_print(0);
+    printf("max = (len1 > len2) ? len1 : len2;\n");
+    tab_print(0);
+    printf("*total = malloc(sizeof(int) * max);\n");
+    tab_print(1);
+    printf("for(i = 0; i < min; i++) {\n");
+    tab_print(0);
+    printf("(*total)[i] = arr1[i] / arr2[i];\n");
+    tab_print(-1);
+    printf("}\n");
+    tab_print(1);
+    printf("for(int *pMax = ((len1 > len2) ? arr1 : arr2);i < max; i++) {\n");
+    tab_print(0);
+    printf("(*total)[i] = ((len1 > len2) ? (pMax[i] / 0) : (0 / pMax[i]));\n");
+    tab_print(-1);
+    printf("}\n");
+    tab_print(0);
+    printf("return max;\n");
+    tab_print(-1);
+    printf("}\n");
+    
+    tab_print(1);
+    printf("int dot_product_arrays(int *arr1, int len1, int *arr2, int len2) {\n");
+	tab_print(0);
+    printf("int sum = 0;\n");
+	tab_print(1);
+    printf("for(int i = 0; i < ((len1 < len2) ? len1 : len2); i++) {\n");
+	tab_print(0);
+    printf("sum += arr1[i] * arr2[i];\n");
+	tab_print(-1);
+    printf("}\n");
+    tab_print(0);
+	printf("return sum;\n");
+    tab_print(-1);
+    printf("}\n");
+
+    printf("\n");
+    tab_print(1);
+    printf("int main() {\n");
+    tab_print(0);
+    printf("int **ts = NULL;\n");
+    tab_print(0);
+    printf("int *ls = NULL;\n");
+    tab_print(0);
+    printf("int lts = 0;\n");
+}
+
+void begin_block() {
+    tab_print(1);
+    printf("{\n"); 
+}
+
+void end_block() {
+    
+    tab_print(-1);
+    printf("}\n");
+}
+
+void end_program() {
+    printf("\n");
+    codegen_free();
+    tab_print(-1);
+    printf("}\n");
+}
+
+void codegen_declare(char (*type)[TYPE_LEN], char var_name[TOKEN_LEN]) {
+    // add variable to variable table
+    declare(type, var_name);
+
+    // print variable to output
+    tab_print(0);
+    if (strcmp(*type, "arr") == 0) {
+        printf("int* %s = NULL;\n", yytext);  // arr x;
     } else {
-        printf("\tint %s;\n", st[top--]);  // int x;
+        printf("int %s;\n", yytext);  // int x;
     }
 }
 
 void codegen_assign() {
-    printf("\t%s = %s;\n", st[top-2], st[top]);    // x = 5;
-    top -= 3;
+    StackMember var_name, exp;
+    pop(NULL, &exp);
+    pop(NULL, &var_name);
+    if(var_name.type == INT) {
+        tab_print(0);
+        printf("%s = %s;\n", var_name.token, exp.token);    // x = 5;
+    } else {
+        tab_print(0);
+        printf("%s = realloc(%s, sizeof(int) * ls[lts - 1]);\n", var_name.token, var_name.token);
+        tab_print(1);
+        printf("for(int i = 0; i < ls[lts - 1]; i++) {\n");
+        tab_print(0);
+        printf("%s[i] = ts[lts - 1][i];\n", var_name.token);
+        tab_print(-1);
+        printf("}\n");
+        update(NULL, var_name.token, ls_last);
+    }
 }
 
 void codegen_arithmetic() {
-    sprintf(temp, "t%d", token_index++);
+    StackMember m1, m2, m3;
+    char expVal[TOKEN_LEN];
 
-    char left[TOKEN_LEN];
-    char right[TOKEN_LEN];
-    char operator[5];
-    strcpy(left, st[top-2]);
-    strcpy(right, st[top]);
-    strcpy(operator, st[top-1]);
-
-    enum token_type leftType = getType(left);
-    enum token_type rightType = getType(right);
-
-    if (leftType == rightType == INTEGER) {
-        addSymbolToTable(temp, "int", 0);
-        printf("\tint %s = %s %s %s;\n", temp, left, operator, right);   // int t1 = 5 + 4
-    } else if (leftType == rightType == ARRAY) { 
-        int resultSize = 0;
-        int leftSize = 0, rightSize = 0;
-
-        leftSize = isConstArray(left) ? getConstArrSize(left) : findVar(left)->arr_size;
-        rightSize = isConstArray(right) ? getConstArrSize(right) : findVar(right)->arr_size;
-        resultSize = leftSize > rightSize ? leftSize : rightSize;
-
-        addSymbolToTable(temp, "arr", resultSize);
-
-        // i need to add here assignments of the t to things...
-        if (leftSize > rightSize) {
-            printf("\t%s = (int*)calloc(%d, sizeof(int));\n", right, resultSize);
-        } else if (leftSize < rightSize) {
-            printf("\t%s = (int*)calloc(%d, sizeof(int));\n", left, resultSize);
-        }
-
-        printf("\tint* %s = (int*)malloc(sizeof(int) * %d);\n", temp, resultSize);
-        printf("\tfor(int i=0; i<%d; i++) {\n", resultSize);
-        printf("\t\t%s[i] = %s[i] %s %s[i];\n\t}\n", temp, left, operator, right);
-    } else {
-        yyerror("Incompatible data types.");
-        exit(0);
+    pop(NULL, &m3);
+    pop(NULL, &m2);
+    pop(NULL, &m1);
+    
+    if((m1.type != m3.type) || (m1.type == m3.type && m2.type == REL_OPERATOR && m1.type != INT)) {
+        error("Type Mismatch.");
+        exit(1);
     }
- 
-    top -=2;
-    strcpy(st[top], temp);
+    
+    switch(m1.type) {
+    case INT:
+        if(m2.type == REL_OPERATOR) {
+            sprintf(expVal, "%s %s %s", m1.token, m2.token, m3.token);
+        } else {
+        tab_print(0);
+        printf("lts++;\n");
+        tab_print(0);
+        printf("ts = realloc(ts, sizeof(int*) * lts);\n");
+        tab_print(0);
+        printf("ls = realloc(ls, sizeof(int) * lts);\n");
+        tab_print(0);
+        printf("ls[lts - 1] = 1;\n");
+        tab_print(0);
+        printf("ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);\n");
+        tab_print(0);
+        printf("ts[lts - 1][0] = %s %s %s;\n", m1.token, m2.token, m3.token);
+        sprintf(expVal, "ts[%d][0]", lts++);
+        }
+        push(NULL, expVal, INT);
+        break;
+    case ARR:
+        int l1, l3;
+        switch(m2.token[0]) {
+            case '+':
+                strcpy(m2.token, "add");
+                break;
+            case '-':
+                strcpy(m2.token, "sub");
+                break;
+            case '*':
+                strcpy(m2.token, "mul");
+                break;
+            case '/':
+                strcpy(m2.token, "div");
+                break;
+        }
+        if(isConstArray(m1.token)) {
+            l1 = getConstArrSize(m1.token);
+            push(NULL, m1.token, m1.type);
+            codegen_const_arr();
+            pop(NULL, &m1);
+        } else {
+            Variable var;
+            get(NULL, &var, m1.token, 0);
+            l1 = var.arr_size;
+        }
+        if(isConstArray(m3.token)) {
+            l3 = getConstArrSize(m3.token);
+            push(NULL, m3.token, m3.type);
+            codegen_const_arr();
+            pop(NULL, &m3);
+        } else {
+            Variable var;
+            get(NULL, &var, m3.token, 0);
+            l3 = var.arr_size;
+        }
+        tab_print(0);
+        printf("lts++;\n");
+        tab_print(0);
+        printf("ts = realloc(ts, sizeof(int*) * lts);\n");
+        tab_print(0);
+        printf("ls = realloc(ls, sizeof(int) * lts);\n");
+        tab_print(0);
+        printf("ls[lts - 1] = %s_arrays(%s, %d, %s, %d, &(ts[lts - 1]));", m2.token, m1.token, l1, m3.token, l3);
+        ls_last = ((l1 > l3) ? l1 : l3);
+        Variable var;
+        sprintf(var.id, "ts[%d]", lts);
+        var.type = ARRAY;
+        var.arr_size = ls_last;
+        insert(NULL, var);
+        sprintf(expVal, "ts[%d]", lts++);
+        push(NULL, expVal, INT);
+        break;
+    case OPERATOR:
+        push(NULL, m2.token, m2.type);
+        break;
+    }
 }
 
-void codegen_relop() {
-    sprintf(temp, "t%d", token_index++);
-    enum token_type leftType = getType(st[top-2]);
-    enum token_type rightType = getType(st[top]);
+void codegen_dotproduct() {
+    StackMember m1, m3;
+    int l1 = 0, l3 = 0;
+    char expVal[TOKEN_LEN];
 
-    if (leftType == rightType == INTEGER) {
-        strcpy(table[tableCurrentIndex].id, temp);
-        strcpy(table[tableCurrentIndex].type, "int");
-
-        printf("\tint %s = %s %s %s;\n", temp, st[top-2], st[top-1], st[top]);   // int t1 = 5 < 4
+    pop(NULL, &m3);
+    pop(NULL, &m1);
+    
+    if((m1.type != m3.type) || (m1.type != ARR)) {
+        error("Type Mismatch.");
+        exit(1);
+    }
+    if(isConstArray(m1.token)) {
+        l1 = getConstArrSize(m1.token);
+        push(NULL, m1.token, m1.type);
+        codegen_const_arr();
+        pop(NULL, &m1);
     } else {
-        yyerror("Incompatible data types.");
-        exit(0);
+        Variable var;
+        get(NULL, &var, m1.token, 0);
+        l1 = var.arr_size;
+    }
+    if(isConstArray(m3.token)) {
+        fprintf(stderr, "m3 const\n");
+        l3 = getConstArrSize(m3.token);
+        push(NULL, m3.token, m3.type);
+        codegen_const_arr();
+        pop(NULL, &m3);
+    } else {
+        Variable var;
+        get(NULL, &var, m3.token, 0);
+        l3 = var.arr_size;
+    }
+    tab_print(0);
+    printf("lts++;\n");
+    tab_print(0);
+    printf("ts = realloc(ts, sizeof(int*) * lts);\n");
+    tab_print(0);
+    printf("ls = realloc(ls, sizeof(int) * lts);\n");
+    tab_print(0);
+    printf("ls[lts - 1] = 1;\n");
+    tab_print(0);
+    printf("ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);\n");
+    tab_print(0);
+    printf("*ts[lts - 1] = dot_product_arrays(%s, %d, %s, %d);\n", m1.token, l1, m3.token, l3);
+    Variable var;
+    sprintf(var.id, "ts[%d]", lts);
+    var.type = INTEGER;
+    ls_last = var.arr_size = 1;
+    insert(NULL, var);
+    sprintf(expVal, "*ts[%d]", lts++);
+    push(NULL, expVal, INT);
+}
+
+void codegen_const_arr() {
+    StackMember m;
+    Variable var;
+    pop(NULL, &m);
+
+    char temp[TOKEN_LEN] = {0};
+    strncpy(temp, m.token + 1, strlen(m.token) - 2);
+    
+    sprintf(var.id, "ts[%d]", lts);
+    var.type = ARRAY;
+    ls_last = var.arr_size = getConstArrSize(m.token);
+    insert(NULL, var);
+
+    tab_print(0);
+    printf("lts++;\n");
+    tab_print(0);
+    printf("ts = realloc(ts, sizeof(int*) * lts);\n");
+    tab_print(0);
+    printf("ls = realloc(ls, sizeof(int) * lts);\n");
+    tab_print(0);
+    printf("ls[lts - 1] = %d;\n", var.arr_size);
+    tab_print(0);
+    printf("ts[lts - 1] = malloc(sizeof(int)*ls[lts-1]);\n");
+    tab_print(0);
+    printf("memcpy(ts[lts - 1], (int[]){%s}, sizeof(int) * ls[lts - 1]);\n", temp);
+    sprintf(m.token, "ts[%d]", lts++);
+
+    push(NULL, m.token, m.type);
+}
+
+void codegen_expList() {
+    char expVal[TOKEN_LEN];
+    if(expListCount) {
+        StackMember exp1, exp2;
+        pop(NULL, &exp2);
+        pop(NULL, &exp1);
+        if(exp2.type == ARR) {
+            error("can\'t print array like this, please use a loop.");
+            exit(1);
+        }
+        sprintf(expVal, "%s, %s", exp1.token, exp2.token);
+    } else {
+        StackMember exp;
+        pop(NULL, &exp);
+        if(exp.type == ARR) {
+            error("can\'t print array like this, please use a loop.");
+            exit(1);
+        }
+        sprintf(expVal, "%s", exp.token);
+    }
+    push(NULL, expVal, EXP_LIST);
+    expListCount++; 
+}
+
+void codegen_print() {
+    if(expListCount == 0) {
+        error("can\'t print nothing");
     }
 
-    top -=2;
-    strcpy(st[top], temp);
+    StackMember expList;
+    pop(NULL, &expList);
+
+    tab_print(0);
+    printf("printf(\"%c%c", '%', 'd');
+    for(int i = 1; i < expListCount; i++) {
+        printf(", %c%c", '%', 'd');
+    }
+
+    printf("\\n\", %s);\n", expList.token);
+    expListCount = 0;
+}
+
+void codegen_if() {
+    StackMember cond;
+    pop(NULL, &cond);
+    tab_print(0);
+    printf("if(%s)\n", cond.token);
+}
+
+void codegen_while() {
+    StackMember cond;
+    pop(NULL, &cond);
+    tab_print(0);
+    printf("while(%s)\n", cond.token);
 }
 
 void codegen_free() {
-    for(int i=0; i<tableCurrentIndex; i++) {
-        if (strcmp(table[i].type, "arr")==0 && table[i].arr_size > 0) {
-            printf("\tfree(%s);\n", table[i].id);   // free(x)
+    int tSize = size(NULL);
+    Variable var;
+    for(int i=0; i < tSize; i++) {
+        get(NULL, &var, NULL, i);
+        if ((var.type == ARRAY) && var.arr_size > 0) {
+            tab_print(0);
+            printf("free(%s);\n", var.id);   // free(x)
         }
     }
+    tab_print(0);
+    printf("free(ls);\n");
+    tab_print(0);
+    printf("free(ts);\n");
+}
+
+void tab_print(int a) {
+    static int tabCount = 0;
+    if(a < 0)
+        tabCount += a;
+    for(int i = 0; i < tabCount; i++)
+        printf("\t");
+    if(a > 0)
+        tabCount += a;
 }
