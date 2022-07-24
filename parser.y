@@ -46,6 +46,7 @@
     int expListCount = 0;
     int lts = 0;
     int ls_last = 0;
+    FILE *fp;
 %}
 
 %start program
@@ -136,6 +137,8 @@ int main(void) {
     Table table;
     Stack stack;
     char type[TYPE_LEN];
+
+    fp = fopen("output.c", "w");
 
     table.size = 0;
     insert(&table, (Variable){0});
@@ -238,160 +241,160 @@ void declare(char (*type)[4], char var_name[TOKEN_LEN]) {
 /* CODE GENERATORS */
 
 void begin_program() {
-    printf("#include <stdio.h>\n");
-    printf("#include <malloc.h>\n");
-    printf("#include <string.h>\n");
+    fprintf(fp, "#include <stdio.h>\n");
+    fprintf(fp, "#include <malloc.h>\n");
+    fprintf(fp, "#include <string.h>\n");
     
     tab_print(1);
-    printf("int add_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
+    fprintf(fp, "int add_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
     tab_print(0);
-    printf("int i, min, max;\n");
+    fprintf(fp, "int i, min, max;\n");
     tab_print(0);
-    printf("min = (len1 < len2) ? len1 : len2;\n");
+    fprintf(fp, "min = (len1 < len2) ? len1 : len2;\n");
     tab_print(0);
-    printf("max = (len1 > len2) ? len1 : len2;\n");
+    fprintf(fp, "max = (len1 > len2) ? len1 : len2;\n");
     tab_print(0);
-    printf("*total = malloc(sizeof(int) * max);\n");
+    fprintf(fp, "*total = malloc(sizeof(int) * max);\n");
     tab_print(1);
-    printf("for(i = 0; i < min; i++) {\n");  
+    fprintf(fp, "for(i = 0; i < min; i++) {\n");  
     tab_print(0);
-    printf("(*total)[i] = arr1[i] + arr2[i];\n");
+    fprintf(fp, "(*total)[i] = arr1[i] + arr2[i];\n");
     tab_print(-1);
-    printf("}\n");
+    fprintf(fp, "}\n");
     tab_print(1);
-    printf("for(int *pMax = ((len1 > len2) ? arr1 : arr2);i < max; i++) {\n");
+    fprintf(fp, "for(int *pMax = ((len1 > len2) ? arr1 : arr2);i < max; i++) {\n");
     tab_print(0);
-    printf("(*total)[i] = pMax[i];\n");
+    fprintf(fp, "(*total)[i] = pMax[i];\n");
     tab_print(-1);
-    printf("}\n");
+    fprintf(fp, "}\n");
     tab_print(0);
-    printf("return max;\n");
+    fprintf(fp, "return max;\n");
     tab_print(-1);
-    printf("}\n");
+    fprintf(fp, "}\n");
 
     tab_print(1);
-    printf("int sub_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
+    fprintf(fp, "int sub_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
     tab_print(0);
-    printf("int i, min, max;\n");
+    fprintf(fp, "int i, min, max;\n");
     tab_print(0);
-    printf("min = (len1 < len2) ? len1 : len2;\n");
+    fprintf(fp, "min = (len1 < len2) ? len1 : len2;\n");
     tab_print(0);
-    printf("max = (len1 > len2) ? len1 : len2;\n");
+    fprintf(fp, "max = (len1 > len2) ? len1 : len2;\n");
     tab_print(0);
-    printf("*total = malloc(sizeof(int) * max);\n");
+    fprintf(fp, "*total = malloc(sizeof(int) * max);\n");
     tab_print(1);
-    printf("for(i = 0; i < min; i++) {\n");
+    fprintf(fp, "for(i = 0; i < min; i++) {\n");
     tab_print(0);
-    printf("(*total)[i] = arr1[i] - arr2[i];\n");
+    fprintf(fp, "(*total)[i] = arr1[i] - arr2[i];\n");
     tab_print(-1);
-    printf("}\n");
+    fprintf(fp, "}\n");
     tab_print(1);
-    printf("for(int *pMax = ((len1 > len2) ? arr1 : arr2);i < max; i++) {\n");
+    fprintf(fp, "for(int *pMax = ((len1 > len2) ? arr1 : arr2);i < max; i++) {\n");
     tab_print(0);
-    printf("(*total)[i] = pMax[i] * ((len1 > len2) ? 1 : -1);\n");
+    fprintf(fp, "(*total)[i] = pMax[i] * ((len1 > len2) ? 1 : -1);\n");
     tab_print(-1);
-    printf("}\n");
+    fprintf(fp, "}\n");
     tab_print(0);
-    printf("return max;\n");
+    fprintf(fp, "return max;\n");
     tab_print(-1);
-    printf("}\n");
+    fprintf(fp, "}\n");
 
     tab_print(1);
-    printf("int mul_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
+    fprintf(fp, "int mul_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
     tab_print(0);
-    printf("int i, min, max;\n");
+    fprintf(fp, "int i, min, max;\n");
     tab_print(0);
-    printf("min = (len1 < len2) ? len1 : len2;\n");
+    fprintf(fp, "min = (len1 < len2) ? len1 : len2;\n");
     tab_print(0);
-    printf("max = (len1 > len2) ? len1 : len2;\n");
+    fprintf(fp, "max = (len1 > len2) ? len1 : len2;\n");
     tab_print(0);
-    printf("*total = malloc(sizeof(int) * max);\n");
+    fprintf(fp, "*total = malloc(sizeof(int) * max);\n");
     tab_print(1);
-    printf("for(i = 0; i < min; i++) {\n");
+    fprintf(fp, "for(i = 0; i < min; i++) {\n");
     tab_print(0);
-    printf("(*total)[i] = arr1[i] * arr2[i];\n");
+    fprintf(fp, "(*total)[i] = arr1[i] * arr2[i];\n");
     tab_print(-1);
-    printf("}\n");
+    fprintf(fp, "}\n");
     tab_print(1);
-    printf("for(;i < max; i++) {\n");
+    fprintf(fp, "for(;i < max; i++) {\n");
     tab_print(0);
-    printf("(*total)[i] = 0;\n");
+    fprintf(fp, "(*total)[i] = 0;\n");
     tab_print(-1);
-    printf("}\n");
+    fprintf(fp, "}\n");
     tab_print(0);
-    printf("return max;\n");
+    fprintf(fp, "return max;\n");
     tab_print(-1);
-    printf("}\n");
+    fprintf(fp, "}\n");
 
     tab_print(1);
-    printf("int div_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
+    fprintf(fp, "int div_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
     tab_print(0);
-    printf("int i, min, max;\n");
+    fprintf(fp, "int i, min, max;\n");
     tab_print(0);
-    printf("min = (len1 < len2) ? len1 : len2;\n");
+    fprintf(fp, "min = (len1 < len2) ? len1 : len2;\n");
     tab_print(0);
-    printf("max = (len1 > len2) ? len1 : len2;\n");
+    fprintf(fp, "max = (len1 > len2) ? len1 : len2;\n");
     tab_print(0);
-    printf("*total = malloc(sizeof(int) * max);\n");
+    fprintf(fp, "*total = malloc(sizeof(int) * max);\n");
     tab_print(1);
-    printf("for(i = 0; i < min; i++) {\n");
+    fprintf(fp, "for(i = 0; i < min; i++) {\n");
     tab_print(0);
-    printf("(*total)[i] = arr1[i] / arr2[i];\n");
+    fprintf(fp, "(*total)[i] = arr1[i] / arr2[i];\n");
     tab_print(-1);
-    printf("}\n");
+    fprintf(fp, "}\n");
     tab_print(1);
-    printf("for(int *pMax = ((len1 > len2) ? arr1 : arr2);i < max; i++) {\n");
+    fprintf(fp, "for(int *pMax = ((len1 > len2) ? arr1 : arr2);i < max; i++) {\n");
     tab_print(0);
-    printf("(*total)[i] = ((len1 > len2) ? (pMax[i] / 0) : (0 / pMax[i]));\n");
+    fprintf(fp, "(*total)[i] = ((len1 > len2) ? (pMax[i] / 0) : (0 / pMax[i]));\n");
     tab_print(-1);
-    printf("}\n");
+    fprintf(fp, "}\n");
     tab_print(0);
-    printf("return max;\n");
+    fprintf(fp, "return max;\n");
     tab_print(-1);
-    printf("}\n");
+    fprintf(fp, "}\n");
     
     tab_print(1);
-    printf("int dot_product_arrays(int *arr1, int len1, int *arr2, int len2) {\n");
+    fprintf(fp, "int dot_product_arrays(int *arr1, int len1, int *arr2, int len2) {\n");
 	tab_print(0);
-    printf("int sum = 0;\n");
+    fprintf(fp, "int sum = 0;\n");
 	tab_print(1);
-    printf("for(int i = 0; i < ((len1 < len2) ? len1 : len2); i++) {\n");
+    fprintf(fp, "for(int i = 0; i < ((len1 < len2) ? len1 : len2); i++) {\n");
 	tab_print(0);
-    printf("sum += arr1[i] * arr2[i];\n");
+    fprintf(fp, "sum += arr1[i] * arr2[i];\n");
 	tab_print(-1);
-    printf("}\n");
+    fprintf(fp, "}\n");
     tab_print(0);
-	printf("return sum;\n");
+	fprintf(fp, "return sum;\n");
     tab_print(-1);
-    printf("}\n");
+    fprintf(fp, "}\n");
 
-    printf("\n");
+    fprintf(fp, "\n");
     tab_print(1);
-    printf("int main() {\n");
+    fprintf(fp, "int main() {\n");
     tab_print(0);
-    printf("int **ts = NULL;\n");
+    fprintf(fp, "int **ts = NULL;\n");
     tab_print(0);
-    printf("int *ls = NULL;\n");
+    fprintf(fp, "int *ls = NULL;\n");
     tab_print(0);
-    printf("int lts = 0;\n");
+    fprintf(fp, "int lts = 0;\n");
 }
 
 void begin_block() {
     tab_print(1);
-    printf("{\n"); 
+    fprintf(fp, "{\n"); 
 }
 
 void end_block() {
     
     tab_print(-1);
-    printf("}\n");
+    fprintf(fp, "}\n");
 }
 
 void end_program() {
-    printf("\n");
+    fprintf(fp, "\n");
     codegen_free();
     tab_print(-1);
-    printf("}\n");
+    fprintf(fp, "}\n");
 }
 
 void codegen_declare(char (*type)[TYPE_LEN], char var_name[TOKEN_LEN]) {
@@ -401,9 +404,9 @@ void codegen_declare(char (*type)[TYPE_LEN], char var_name[TOKEN_LEN]) {
     // print variable to output
     tab_print(0);
     if (strcmp(*type, "arr") == 0) {
-        printf("int* %s = NULL;\n", yytext);  // arr x;
+        fprintf(fp, "int* %s = NULL;\n", yytext);  // arr x;
     } else {
-        printf("int %s;\n", yytext);  // int x;
+        fprintf(fp, "int %s;\n", yytext);  // int x;
     }
 }
 
@@ -413,16 +416,16 @@ void codegen_assign() {
     pop(NULL, &var_name);
     if(var_name.type == INT) {
         tab_print(0);
-        printf("%s = %s;\n", var_name.token, exp.token);    // x = 5;
+        fprintf(fp, "%s = %s;\n", var_name.token, exp.token);    // x = 5;
     } else {
         tab_print(0);
-        printf("%s = realloc(%s, sizeof(int) * ls[lts - 1]);\n", var_name.token, var_name.token);
+        fprintf(fp, "%s = realloc(%s, sizeof(int) * ls[lts - 1]);\n", var_name.token, var_name.token);
         tab_print(1);
-        printf("for(int i = 0; i < ls[lts - 1]; i++) {\n");
+        fprintf(fp, "for(int i = 0; i < ls[lts - 1]; i++) {\n");
         tab_print(0);
-        printf("%s[i] = ts[lts - 1][i];\n", var_name.token);
+        fprintf(fp, "%s[i] = ts[lts - 1][i];\n", var_name.token);
         tab_print(-1);
-        printf("}\n");
+        fprintf(fp, "}\n");
         update(NULL, var_name.token, ls_last);
     }
 }
@@ -446,17 +449,17 @@ void codegen_arithmetic() {
             sprintf(expVal, "%s %s %s", m1.token, m2.token, m3.token);
         } else {
         tab_print(0);
-        printf("lts++;\n");
+        fprintf(fp, "lts++;\n");
         tab_print(0);
-        printf("ts = realloc(ts, sizeof(int*) * lts);\n");
+        fprintf(fp, "ts = realloc(ts, sizeof(int*) * lts);\n");
         tab_print(0);
-        printf("ls = realloc(ls, sizeof(int) * lts);\n");
+        fprintf(fp, "ls = realloc(ls, sizeof(int) * lts);\n");
         tab_print(0);
-        printf("ls[lts - 1] = 1;\n");
+        fprintf(fp, "ls[lts - 1] = 1;\n");
         tab_print(0);
-        printf("ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);\n");
+        fprintf(fp, "ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);\n");
         tab_print(0);
-        printf("ts[lts - 1][0] = %s %s %s;\n", m1.token, m2.token, m3.token);
+        fprintf(fp, "ts[lts - 1][0] = %s %s %s;\n", m1.token, m2.token, m3.token);
         sprintf(expVal, "ts[%d][0]", lts++);
         }
         push(NULL, expVal, INT);
@@ -498,13 +501,13 @@ void codegen_arithmetic() {
             l3 = var.arr_size;
         }
         tab_print(0);
-        printf("lts++;\n");
+        fprintf(fp, "lts++;\n");
         tab_print(0);
-        printf("ts = realloc(ts, sizeof(int*) * lts);\n");
+        fprintf(fp, "ts = realloc(ts, sizeof(int*) * lts);\n");
         tab_print(0);
-        printf("ls = realloc(ls, sizeof(int) * lts);\n");
+        fprintf(fp, "ls = realloc(ls, sizeof(int) * lts);\n");
         tab_print(0);
-        printf("ls[lts - 1] = %s_arrays(%s, %d, %s, %d, &(ts[lts - 1]));", m2.token, m1.token, l1, m3.token, l3);
+        fprintf(fp, "ls[lts - 1] = %s_arrays(%s, %d, %s, %d, &(ts[lts - 1]));", m2.token, m1.token, l1, m3.token, l3);
         ls_last = ((l1 > l3) ? l1 : l3);
         Variable var;
         sprintf(var.id, "ts[%d]", lts);
@@ -554,17 +557,17 @@ void codegen_dotproduct() {
         l3 = var.arr_size;
     }
     tab_print(0);
-    printf("lts++;\n");
+    fprintf(fp, "lts++;\n");
     tab_print(0);
-    printf("ts = realloc(ts, sizeof(int*) * lts);\n");
+    fprintf(fp, "ts = realloc(ts, sizeof(int*) * lts);\n");
     tab_print(0);
-    printf("ls = realloc(ls, sizeof(int) * lts);\n");
+    fprintf(fp, "ls = realloc(ls, sizeof(int) * lts);\n");
     tab_print(0);
-    printf("ls[lts - 1] = 1;\n");
+    fprintf(fp, "ls[lts - 1] = 1;\n");
     tab_print(0);
-    printf("ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);\n");
+    fprintf(fp, "ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);\n");
     tab_print(0);
-    printf("*ts[lts - 1] = dot_product_arrays(%s, %d, %s, %d);\n", m1.token, l1, m3.token, l3);
+    fprintf(fp, "*ts[lts - 1] = dot_product_arrays(%s, %d, %s, %d);\n", m1.token, l1, m3.token, l3);
     Variable var;
     sprintf(var.id, "ts[%d]", lts);
     var.type = INTEGER;
@@ -588,17 +591,17 @@ void codegen_const_arr() {
     insert(NULL, var);
 
     tab_print(0);
-    printf("lts++;\n");
+    fprintf(fp, "lts++;\n");
     tab_print(0);
-    printf("ts = realloc(ts, sizeof(int*) * lts);\n");
+    fprintf(fp, "ts = realloc(ts, sizeof(int*) * lts);\n");
     tab_print(0);
-    printf("ls = realloc(ls, sizeof(int) * lts);\n");
+    fprintf(fp, "ls = realloc(ls, sizeof(int) * lts);\n");
     tab_print(0);
-    printf("ls[lts - 1] = %d;\n", var.arr_size);
+    fprintf(fp, "ls[lts - 1] = %d;\n", var.arr_size);
     tab_print(0);
-    printf("ts[lts - 1] = malloc(sizeof(int)*ls[lts-1]);\n");
+    fprintf(fp, "ts[lts - 1] = malloc(sizeof(int)*ls[lts-1]);\n");
     tab_print(0);
-    printf("memcpy(ts[lts - 1], (int[]){%s}, sizeof(int) * ls[lts - 1]);\n", temp);
+    fprintf(fp, "memcpy(ts[lts - 1], (int[]){%s}, sizeof(int) * ls[lts - 1]);\n", temp);
     sprintf(m.token, "ts[%d]", lts++);
 
     push(NULL, m.token, m.type);
@@ -637,12 +640,12 @@ void codegen_print() {
     pop(NULL, &expList);
 
     tab_print(0);
-    printf("printf(\"%c%c", '%', 'd');
+    fprintf(fp, "printf(\"%c%c", '%', 'd');
     for(int i = 1; i < expListCount; i++) {
         printf(", %c%c", '%', 'd');
     }
 
-    printf("\\n\", %s);\n", expList.token);
+    fprintf(fp, "\\n\", %s);\n", expList.token);
     expListCount = 0;
 }
 
@@ -650,14 +653,14 @@ void codegen_if() {
     StackMember cond;
     pop(NULL, &cond);
     tab_print(0);
-    printf("if(%s)\n", cond.token);
+    fprintf(fp, "if(%s)\n", cond.token);
 }
 
 void codegen_while() {
     StackMember cond;
     pop(NULL, &cond);
     tab_print(0);
-    printf("while(%s)\n", cond.token);
+    fprintf(fp, "while(%s)\n", cond.token);
 }
 
 void codegen_free() {
@@ -667,13 +670,13 @@ void codegen_free() {
         get(NULL, &var, NULL, i);
         if ((var.type == ARRAY) && var.arr_size > 0) {
             tab_print(0);
-            printf("free(%s);\n", var.id);   // free(x)
+            fprintf(fp, "free(%s);\n", var.id);   // free(x)
         }
     }
     tab_print(0);
-    printf("free(ls);\n");
+    fprintf(fp, "free(ls);\n");
     tab_print(0);
-    printf("free(ts);\n");
+    fprintf(fp, "free(ts);\n");
 }
 
 void tab_print(int a) {
@@ -681,7 +684,7 @@ void tab_print(int a) {
     if(a < 0)
         tabCount += a;
     for(int i = 0; i < tabCount; i++)
-        printf("\t");
+        fprintf(fp, "\t");
     if(a > 0)
         tabCount += a;
 }
