@@ -1,5 +1,6 @@
 make.exe --dry-run --keep-going --print-directory
 make.exe: Entering directory `c:/Users/karina/OneDrive/Desktop/Shenkar/3year2sem/Compilation/Compiler/Test1 - Copy'
-make.exe: `program.exe' is up to date.
+make.exe: `output.c' is up to date.
+ 
 make.exe: Leaving directory `c:/Users/karina/OneDrive/Desktop/Shenkar/3year2sem/Compilation/Compiler/Test1 - Copy'
  

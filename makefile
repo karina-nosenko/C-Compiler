@@ -1,8 +1,8 @@
 program.exe: output.c
 	gcc .\output.c -o program.exe
 
-output.c: interpreter.exe
-	type .\input.al | .\interpreter.exe
+output.c: interpreter.exe input.txt
+	type .\input.txt | .\interpreter.exe
 
 interpreter.exe: lex.yy.c parser.tab.c
 	gcc lex.yy.c parser.tab.c symbol_table.c stack.c -o interpreter.exe
@@ -14,4 +14,4 @@ parser.tab.c: parser.y
 	bison -d parser.y
 
 clean: 
-	del lex.yy.c parser.tab.c parser.tab.h interpreter.exe output.c program.exe
+	del lex.yy.c parser.tab.c parser.tab.h interpreter.exe output.c

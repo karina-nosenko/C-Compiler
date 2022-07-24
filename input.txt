@@ -1,0 +1,6 @@
+begin
+    arr a, b;
+    int n;
+    n = 6;
+    print n;
+end
