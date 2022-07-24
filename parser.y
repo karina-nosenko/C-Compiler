@@ -117,7 +117,7 @@ expression          : expression OP { push(NULL, yytext, OPERATOR); } expression
                     | variable_declared
                     | const_arr { codegen_const_arr(); }
                     | number
-                    | INDEX number { codegen_index(); }
+                    | variable_declared INDEX number { codegen_index(); }
                     ;      
 
 cond                : expression REL_OP { push(NULL, yytext, REL_OPERATOR); } expression { codegen_arithmetic(); }
@@ -624,18 +624,18 @@ void codegen_expList() {
         StackMember exp1, exp2;
         pop(NULL, &exp2);
         pop(NULL, &exp1);
-        if(exp2.type == ARR) {
-            error("can\'t print array like this, please use a loop.");
-            exit(1);
-        }
+        // if(exp2.type == ARR) {
+        //     error("can\'t print array like this, please use a loop.");
+        //     exit(1);
+        // }
         sprintf(expVal, "%s, %s", exp1.token, exp2.token);
     } else {
         StackMember exp;
         pop(NULL, &exp);
-        if(exp.type == ARR) {
-            error("can\'t print array like this, please use a loop.");
-            exit(1);
-        }
+        // if(exp.type == ARR) {
+        //     error("can\'t print array like this, please use a loop.");
+        //     exit(1);
+        // }
         sprintf(expVal, "%s", exp.token);
     }
     push(NULL, expVal, EXP_LIST);
@@ -675,7 +675,14 @@ void codegen_while() {
 }
 
 void codegen_index() {
-    
+    StackMember index;
+    StackMember var;
+    pop(NULL, &index);
+    pop(NULL, &var);
+
+    fprintf(stderr, "index: %s\n", index.token);
+    fprintf(stderr, "var: %s\n", index.token);
+
 }
 
 void codegen_free() {
