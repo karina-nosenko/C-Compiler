@@ -1,6 +1,12 @@
-make.exe --dry-run --keep-going --print-directory
-make.exe: Entering directory `c:/Users/karina/OneDrive/Desktop/Shenkar/3year2sem/Compilation/Compiler/Test1 - Copy'
-make.exe: `output.c' is up to date.
+make.exe --dry-run --always-make --keep-going --print-directory
+make.exe: Entering directory `d:/Data/Documents/PersonalProjects/C-Compiler'
+bison -d parser.y
  
-make.exe: Leaving directory `c:/Users/karina/OneDrive/Desktop/Shenkar/3year2sem/Compilation/Compiler/Test1 - Copy'
+flex scanner.l
+gcc -Wl,--stack,16777216 lex.yy.c parser.tab.c symbol_table.c stack.c -o interpreter.exe
+ 
+type .\input.txt | .\interpreter.exe
+gcc .\output.c -o program.exe
+ 
+make.exe: Leaving directory `d:/Data/Documents/PersonalProjects/C-Compiler'
  

@@ -8,7 +8,7 @@ make.exe all --print-data-base --no-builtin-variables --no-builtin-rules --quest
 # This program built for i386-pc-mingw32
  
 
-# Make data base, printed on Sun Jul 24 11:17:34 2022
+# Make data base, printed on Sun Jul 24 19:17:15 2022
 
 # Variables
 
@@ -16,8 +16,12 @@ make.exe all --print-data-base --no-builtin-variables --no-builtin-rules --quest
 <D = $(patsubst %/,%,$(dir $<))
 # automatic
 ?F = $(notdir $?)
+# environment
+KISYS3DMOD = C:\Program Files\KiCad\share\kicad\3dmodels
 # makefile
 MAKEFLAGS = Rrqp
+# environment
+KICAD_TEMPLATE_DIR = C:\Program Files\KiCad\share\kicad\template
 # automatic
 ?D = $(patsubst %/,%,$(dir $?))
 # automatic
@@ -28,47 +32,63 @@ HOMEDRIVE = C:
 @F = $(notdir $@)
 # automatic
 ^D = $(patsubst %/,%,$(dir $^))
+ 
 # makefile
-CURDIR := c:/Users/karina/OneDrive/Desktop/Shenkar/3year2sem/Compilation/Compiler/Test1 - Copy
+CURDIR := d:/Data/Documents/PersonalProjects/C-Compiler
 # default
 SHELL := sh.exe
 # environment
-WINDIR = C:\Windows
+CLION = C:\Program Files\JetBrains\CLion 2021.3.4\bin;
+# environment
+WINDIR = C:\WINDOWS
 # environment
 VSCODE_NLS_CONFIG = {"locale":"en-us","availableLanguages":{},"_languagePackSupport":true}
 # environment
-VBOX_MSI_INSTALL_PATH = C:\Program Files\Oracle\VirtualBox\
+VS150PROCOMNTOOLS = D:\Programs\Microsoft Visual Studio\2017\Proffessional\Common7\Tools\
 # environment
-PYCHARM COMMUNITY EDITION = C:\Program Files\JetBrains\PyCharm Community Edition 2022.1.3\bin;
+ONEDRIVE = C:\Users\harry\OneDrive
 # environment
-ONEDRIVE = C:\Users\karina\OneDrive
+MSMPI_BIN = C:\Program Files\Microsoft MPI\B 
+in\
 # environment
 PATHEXT = .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
 # makefile (from `makefile', line 1)
 MAKEFILE_LIST :=  makefile
 # environment
-TMP = C:\Users\karina\AppData\Local\Temp
+FPS_BROWSER_USER_PROFILE_STRING = Default
+# environment
+TMP = C:\Users\harry\AppData\Local\Temp
+# environment
+WEBSTORM = D:\Programs\JetBrains\WebStorm 2022.1\bin;
 # environment
 PROGRAMW6432 = C:\Program Files
 # environment
 PROGRAMDATA = C:\ProgramData
 # environment
-VSCODE_CWD = C:\Users\karina\AppData\Local\Programs\Microsoft VS Code
+VSCODE_CWD = C:\Users\harry\AppData\Local\Programs\Microsoft VS Code
 # environment
-PATH = C:\Program Files\Common Files\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files (x86)\GnuWin32\bin;C:\MinGW\bin;C:\Program Files\Git\cmd;C:\Users\karina\AppData\Local\Microsoft\WindowsApps;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.1.3\bin;;C:\Users\karina\AppData\Local\Programs\Microsoft VS Code\bin;C:\Program Files\JetBrains\PyCharm Community Edition 2022.1.3\bin;;C:\MinGW\bin;
+PATH = C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files\AdoptOpenJDK\jre-11.0.7.10-hotspot\bin;C:\ProgramData\Oracle\Java\javapath;C:\Program Files\Microsoft MPI\Bin\;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\iCLS\;C:\Program Files\Intel\Intel(R) Management Engine Components\iCLS\;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files\Intel\Intel(R) Management Engine Components\IPT;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\dotnet\;C:\Program Files\Microsoft SQL Server\130\Tools\Binn\;C:\Program;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Program Files (x86)\Microsoft SQL Server\140\Tools\Binn\;C:\Program Files\Microsoft SQL Server\140\Tools\Binn\;C:\Program Files (x86)\Microsoft SQL Server\140\DTS\Binn\;C:\Program Files\Microsoft SQL Server\140\DTS\Binn\;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\130\Tools\Binn\;C:\Program Files (x86)\Microsoft SQL Server\Client SDK\ODBC\130\Tools\Binn\;C:\Program Files (x86)\Microsoft SQL Server\140\Tools\Binn\ManagementStudio\;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;D:\Programs\PuTTY\;D:\Programs\Visual Leak Detector\bin\Win32;D:\Programs\Visual Leak Detector\bin\Win64;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\;D:\Programs\nodejs\;C:\ProgramData\chocolatey\bin;C:\Android;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\Git\cmd;C:\Program Files (x86)\dotnet\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Users\harry\AppData\Local\Programs\Python\Python37-32\Scripts\;C:\Users\harry\AppData\Local\Programs\Python\Python37-32\;C:\Users\harry\AppData\Local\Microsoft\WindowsApps;C:\Program Files\Java\jdk1.8.0_181\bin;C:\Users\harry\AppData\Roaming\Composer\vendor\bin;C:\adb;D:\Android\android-sdk\build-tools\25.0.3;D:\Programs\Microsoft VS Code\bin;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;D:\Programs\sass;C:\Users\harry\Desktop\run;C:\Program Files (x86)\7-Zip;D:\Programs\OpenVPN\bin;C:\Users\harry\AppData\Local\GitHubDesktop\bin;C:\Users\harry\Documents\CARLA_0.9.4\;C:\ProgramData\ComposerSetup\bin;D:\wamp\bin\php\php7.4.1;D:\Programs\Nmap;C:\Users\harry\AppData\Roaming\npm;C:\Users\harry\.dotnet\tools;C:\Program Files (x86)\GnuWin32\bin;C:\Users\harry\AppData\Local\gitkraken\bin;D:\Programs\CMake\bin;C:\Users\harry\.dotnet\tools;C:\Users\harry\AppData\Local\Microsoft\WindowsApps;C:\Program Files\JetBrains\CLion 2021.3.4\bin;;D:\Programs\JetBrains\WebStorm 2022.1\bin;;C:\Users\harry\AppData\Local\Programs\Microsoft VS Code\bin;D:\Programs\GnuWin32\bin;c:\Program Files\JetBrains\CLion 2021.3.4\bin\mingw\bin\;
+# environment
+SW_SIM_HYDRA = C:\Program Files\Common Files\SolidWorks Shared\Simulation Worker Agent\
+# environment
+PTCNMSPORT = 11239
 # environment
 COMMONPROGRAMW6432 = C:\Program Files\Common Files
 # environment
 ZES_ENABLE_SYSMAN = 1
 # environment
+CHOCOLATEYLASTPATHUPDATE = 132507645709376413
+# environment
 PROCESSOR_ARCHITECTURE = x86
 # environment
-USERPR 
-OFILE = C:\Users\karina
+USERPROFILE =  
+C:\Users\harry
+# environment
+CHOCOLATEYINSTALL = C:\ProgramData\chocolatey
 # environment
 ALLUSERSPROFILE = C:\ProgramData
 # environment
-NUMBER_OF_PROCESSORS = 20
+NUMBER_OF_PROCESSORS = 12
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # default
@@ -76,53 +96,65 @@ ELECTRON_RUN_AS_NODE = 1
 # automatic
 %F = $(notdir $%)
 # environment
-CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_21736_WPXTDGEIZMSYMXFB
+ANDROID_SDK_HOME = C:\Android
 # environment
-COMPUTERNAME = MSI
+CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_11460_UNZNILVJQLICYIFI
 # environment
-PROGRAMFILES = C:\Program Files (x86)
+COMPUTERNAME = HARRY-LAPTOP
+# environment
+PROGRAMFILES = 
+ C:\Program Files (x86)
 # environment
 DRIVERDATA = C:\Windows\System32\Drivers\DriverData
 # environment
 ORIGINAL_XDG_CURRENT_DESKTOP = undefined
 # environment
-USERNAME = karin
+USERNAME = harry
 # environment
 PUBLIC = C:\Users\Public
 # environment
 VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
-VSCODE_CODE_CACHE_PATH = C:\Users\karina\AppData\Roaming\Code\CachedData\b06ae3b2d2dbfe28bca3134cc6be65935cdfea6a
+VSCODE_CODE_CACHE_PATH = C:\Users\harry\AppData\Roaming\Code\CachedData\3b889b090b5ad5793f524b5d1d39fda662b96a2a
 # environment
-APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
 # environment
 COMMONPROGRAMFILES = C:\Program Files (x86)\Common Files
 # environment
-LOGONSERVER = \\MSI
+LOGONSERVER = \\HARRY-LAPTOP
 # environment
-ONEDRIVECONSUMER = C:\Users\karina\OneDrive
+ONEDRIVECONSUMER = C:\Users\harry\OneDrive
 # environment
 VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 # environment
-USERDOMAIN = MSI
-# environment
-INTELLIJ IDEA COMMUNITY EDITION = C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.1.3\bin;
+USERDOMAIN = HARRY-LAPTOP
 # default
 MAKE = $(MAKE_COMMAND)
 # default
 MAKECMDGOALS := all
+# environment
+KISYSMOD = C:\Program Files\KiCad\share\kicad\modules
+# environment
+JAVA_HOME = C:\Program Files\AdoptOpenJDK\jre-11.0.7.10-hotspot\
 # default
 MAKE_VERSION := 3.81
+# environment
+KICAD_SYMBOL_DIR = C:\Program Files\KiCad\share\kicad\library
 # makefile
-.DEFAULT_GOAL := output.c
+.DEFAULT_GOAL := program.exe
+# environment
+PTC_D_LICENSE_FILE = C:\Program Files\PTC\PTC_D_SSQ.dat
 # environment
 PROGRAMFILES(X86) = C:\Program Files (x86)
 # automatic
 %D = $(patsubst %/,%,$(dir $%))
 # environment
-LOCALAPPDATA = C:\Users\karina\AppData\Local
+MYSQLCONNECTOR_ASSEMBLIESPATH = C:\Program Files (x86)\MySQL\Connector NET 8.0\Assemblies\v4.5.2
 # environment
-PSMODULEPATH = C:\Program Files\WindowsPowerShell\Modules;C:\Windows\system32\WindowsPowerShell\v1.0\Modules
+LOCALAPPDATA = C:\Users\harry\AppData\Local
+# environment
+PSMODULEPATH = C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system 
+32\WindowsPowerShell\v1.0\Modules;C:\Program Files (x86)\Microsoft SQL Server\140\Tools\PowerShell\Modules\
 # default
 MAKE_COMMAND := make.exe
 # environment
@@ -132,15 +164,16 @@ PROCESSOR_ARCHITEW6432 = AMD64
 # automatic
 *F = $(notdir $*)
 # environment
-PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 154 Stepping 3, GenuineIntel
+PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 158 Stepping 10, GenuineIntel
 # environment
 OS = Windows_NT
 # environment
-VSCODE_IPC_HOOK = \\.\pipe\c4bcf124dd494e103c78f9c0ad774d9a-1.69.1-main-sock
+VSCODE_IPC_HOOK = \\.\pipe\144327d9dc1ed2824d612b520946942f-1.69.2-main-sock
 # environment
-HOMEPATH = \Users\karina
+HOMEPATH = \Users\harry
 # environment
-COMMONPROGRAMFILES(X86) = C:\Program Files (x86)\Common Files
+COMMON 
+PROGRAMFILES(X86) = C:\Program Files (x86)\Common Files
 # environment
 PROMPT = $P$G
 # environment
@@ -148,19 +181,17 @@ MFLAGS = -Rrqp
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
-SYSTEMROOT = C:\Windows
+SYSTEMROOT = C:\WINDOWS
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
 # automatic
 +F = $(notdir $+)
 # environment
-APPDATA = C:\Users\karina\AppData\Roaming
+APPDATA = C:\Users\harry\AppData\Roaming
 # environment
-__COMPAT_LAYER = DetectorsAppHealth
+TEMP = C:\Users\harry\AppData\Local\Temp
 # environment
-TEMP = C:\Users\karina\AppData\Local\Temp
-# environment
-COMSPEC = C:\Windows\system32\cmd.exe
+COMSPEC = C:\WINDOWS\system32\cmd.exe
 # default
 MAKEFILES := 
 # automatic
@@ -168,7 +199,7 @@ MAKEFILES :=
 # environment
 LC_ALL = C
 # environment
-CONFIGSETROOT = C:\Windows\ConfigSetRoot
+SW_SIM_TEMP = C:\ProgramData\SOLIDWORKS\SW_net_sim_temp\
 # automatic
 ^F = $(notdir $^)
 # default
@@ -178,7 +209,9 @@ SYSTEMDRIVE = C:
 # environment
 SESSIONNAME = Console
 # environment
-PROCESSOR_REVISION = 9a03
+PROCESSOR_REVISION = 9e0a
+# environment
+SW_SIM_MPIT = INTELMPI
 # environment
 MAKELEVEL := 0
 # environment
@@ -186,12 +219,14 @@ LANG = C
 # environment
 PROCESSOR_LEVEL = 6
 # environment
-VSCODE_PID = 21736
+FPS_BROWSER_APP_PROFILE_STRING = Internet Explorer
 # environment
-USERDOMAIN_ROAMINGPROFILE = MSI
-# variable set hash-table stats:
-# Load=88/1024=9%,  
-Rehash=0, Collisions=9/108=8%
+VSCODE_PID = 11460
+# environment
+USERDOMAIN_ROAMINGPROFILE = HARRY-LAPTOP
+# varia 
+ble set hash-table stats:
+# Load=103/1024=10%, Rehash=0, Collisions=10/123=8%
 
 # Pattern-specific Variable Values
 
@@ -200,25 +235,92 @@ Rehash=0, Collisions=9/108=8%
 # Directories
 
 # : could not be stat'd.
-# C:\Program Files\Common Files\Oracle\Java\javapath (key C:/Program Files/Common Files/Oracle/Java/javapath, mtime 1657194705): 6 files, no impossibilities.
-# C:\Windows\System32\WindowsPowerShell\v1.0\ (key C:/Windows/System32/WindowsPowerShell/v1.0/, mtime 1657284870): 30 files, no impossibilities.
-# C:\Windows\System32\Wbem (key C:/Windows/System32/Wbem, mtime 1657285180): 171 files, no impossibilities.
-# . (key c:/Users/karina/OneDrive/Desktop/Shenkar/3year2sem/Compilation/Compiler/Test1 - Copy, mtime 1658650652): 18 files, no impossibilities.
-# C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common (key C:/Program Files (x86)/NVIDIA Corporation/PhysX/Common, mtime 1641907477): 10 files, no impossibilities.
-# C:\Users\karina\AppData\Local\Programs\Microsoft VS Code\bin (key C:/Users/karina/AppData/Local/Programs/Microsoft VS Code/bin, mtime 1657651695): 4 files, no impossibilities.
-# C:\Program Files\JetBrains\PyCharm Community Edition 2022.1.3\bin (key C:/Program Files/JetBrains/PyCharm Community Edition 2022.1.3/bin, mtime 1657210082): 28 files, no impossibilities.
-# C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.1.3\bin (key C:/Program Files/JetBrains/IntelliJ IDEA Community Edition 2022.1.3/bin, mtime 1657193610): 31 files, no impossibilities.
-# C:\MinGW\bin (key C:/MinGW/bin, mtime 1634524516): 61 files, no impossibilities.
-# C:\Windows\Sys 
-tem32\OpenSSH\: could not be stat'd.
-# C:\Windows (key C:/Windows, mtime 1657784820): 119 files, no impossibilities.
-# C:\Users\karina\AppData\Local\Microsoft\WindowsApps (key C:/Users/karina/AppData/Local/Microsoft/WindowsApps, mtime 1658567571): 27 files, no impossibilities.
-# C:\Program Files\Git\cmd (key C:/Program Files/Git/cmd, mtime 1657654240): 8 files, no impossibilities.
-# C:\Windows\system32 (key C:/Windows/system32, mtime 1657914715): 2859 files, no impossibilities.
-# C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR (key C:/Program Files/NVIDIA Corporation/NVIDIA NvDLISR, mtime 1641907515): 5 files, no impossibilities.
-# C:\Program Files (x86)\GnuWin32\bin (key C:/Program Files (x86)/GnuWin32/bin, mtime 1657475382): 12 files, no impossibilities.
+# C:\Program Files (x86)\Microsoft SQL Server\140\DTS\Binn\ (key C:/Program Files (x86)/Microsoft SQL Server/140/DTS/Binn/, mtime 1655428711): 70 files, no impossibilities.
+# C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\iCLS\ (key C:/Program Files (x86)/Intel/Intel(R) Management Engine Componen 
+ts/iCLS/, mtime 1527726040): 8 files, no impossibilities.
+# c:\Program Files\JetBrains\CLion 2021.3.4\bin\mingw\bin\ (key c:/Program Files/JetBrains/CLion 2021.3.4/bin/mingw/bin/, mtime 1649395807): 37 files, no impossibilities.
+# C:\Program Files (x86)\Microsoft SQL Server\Client SDK\ODBC\130\Tools\Binn\ (key C:/Program Files (x86)/Microsoft SQL Server/Client SDK/ODBC/130/Tools/Binn/, mtime 1655428719): 6 files, no impossibilities.
+# C:\Program Files\Microsoft SQL Server\140\Tools\Binn\ (key C:/Program Fil 
+es/Microsoft SQL Server/140/Tools/Binn/, mtime 1655428719): 13 files, no impossibilities.
+# D:\Programs\JetBrains\WebStorm 2022.1\bin (key D:/Programs/JetBrains/WebStorm 2022.1/bin, mtime 1652151457): 28 files, no impossibilities.
+# C:\Android (key C:/Android, mtime 1576031066): 8 files, no impossibilities.
+# C:\Users\harry\Documents\CARLA_0.9.4\: could not be stat'd.
+# D:\Programs\Visual Leak Detector\bin\Win64 (key D:/Programs/Visual Leak Detector/bin/Win64, mtime 1650834599): 6 files, no impossibilities. 
 
-# 3389 files, no impossibilities in 17 directories.
+# C:\ProgramData\chocolatey\bin (key C:/ProgramData/chocolatey/bin, mtime 1620652196): 22 files, no impossibilities.
+# C:\Users\harry\AppData\Local\Programs\Microsoft VS Code\bin (key C:/Users/harry/AppData/Local/Programs/Microsoft VS Code/bin, mtime 1658587134): 4 files, no impossibilities.
+# D:\Android\android-sdk\build-tools\25.0.3: could not be stat'd.
+# C:\Windows\System32\WindowsPowerShell\v1.0\ (key C:/Windows/System32/WindowsPowerShell/v1.0/, mtime 1648838875): 31 files, no impossibilities.
+# C:\Us 
+ers\harry\AppData\Local\Programs\Python\Python37-32\ (key C:/Users/harry/AppData/Local/Programs/Python/Python37-32/, mtime 1552916863): 17 files, no impossibilities.
+# C:\Windows\System32\Wbem (key C:/Windows/System32/Wbem, mtime 1648847285): 203 files, no impossibilities.
+# . (key d:/Data/Documents/PersonalProjects/C-Compiler, mtime 1658678526): 21 files, no impossibilities.
+# D:\Programs\Nmap (key D:/Programs/Nmap, mtime 1650834541): 11 files, no impossibilities.
+# C:\Program Files (x86)\Windows Kits\8.1\ 
+Windows Performance Toolkit\ (key C:/Program Files (x86)/Windows Kits/8.1/Windows Performance Toolkit/, mtime 1543592769): 73 files, no impossibilities.
+# C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common (key C:/Program Files (x86)/NVIDIA Corporation/PhysX/Common, mtime 1587060338): 11 files, no impossibilities.
+# C:\Users\harry\AppData\Local\Programs\Python\Python37-32\Scripts\ (key C:/Users/harry/AppData/Local/Programs/Python/Python37-32/Scripts/, mtime 1552916979): 8 files, no impossibilities.
+# C: 
+\Users\harry\AppData\Roaming\npm (key C:/Users/harry/AppData/Roaming/npm, mtime 1570718247): 6 files, no impossibilities.
+# C:\Users\harry\.dotnet\tools: could not be stat'd.
+# C:\Program Files\Microsoft MPI\Bin\ (key C:/Program Files/Microsoft MPI/Bin/, mtime 1535887601): 6 files, no impossibilities.
+# C:\Program Files\dotnet\ (key C:/Program Files/dotnet/, mtime 1653915348): 13 files, no impossibilities.
+# C:\Program Files (x86)\7-Zip (key C:/Program Files (x86)/7-Zip, mtime 1544797715): 26 files, no impo 
+ssibilities.
+# C:\Users\harry\AppData\Roaming\Composer\vendor\bin: could not be stat'd.
+# D:\wamp\bin\php\php7.4.1 (key D:/wamp/bin/php/php7.4.1, mtime 1650834728): 41 files, no impossibilities.
+# D:\Programs\sass (key D:/Programs/sass, mtime 1650834548): 5 files, no impossibilities.
+# C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\ (key C:/Program Files/Microsoft SQL Server/Client SDK/ODBC/170/Tools/Binn/, mtime 1570459561): 7 files, no impossibilities.
+# C:\Users\harry\Desktop\run: c 
+ould not be stat'd.
+# C:\Program Files\Intel\Intel(R) Management Engine Components\IPT (key C:/Program Files/Intel/Intel(R) Management Engine Components/IPT, mtime 1527726026): 5 files, no impossibilities.
+# C:\WINDOWS\System32\OpenSSH\: could not be stat'd.
+# C:\Users\harry\AppData\Local\GitHubDesktop\bin (key C:/Users/harry/AppData/Local/GitHubDesktop/bin, mtime 1546517925): 4 files, no impossibilities.
+# D:\Programs\Visual Leak Detector\bin\Win32 (key D:/Programs/Visual Leak Detector/bin/Win32, mtime 165 
+0834599): 6 files, no impossibilities.
+# C:\Program Files (x86)\Common Files\Oracle\Java\javapath (key C:/Program Files (x86)/Common Files/Oracle/Java/javapath, mtime 1658599300): 5 files, no impossibilities.
+# D:\Programs\CMake\bin (key D:/Programs/CMake/bin, mtime 1650834027): 7 files, no impossibilities.
+# C:\Users\harry\AppData\Local\Microsoft\WindowsApps (key C:/Users/harry/AppData/Local/Microsoft/WindowsApps, mtime 1658676349): 34 files, no impossibilities.
+# C:\Program Files (x86)\Microsoft SQL Server\140\Tools\Binn\ (key C:/Program Files (x86)/Microsoft SQL Server/140/Tools/Binn/, mtime 1655428711): 55 files, no impossibilities.
+# C:\Program: could not be stat'd.
+# C:\Program Files\Intel\Intel(R) Management Engine Components\DAL (key C:/Program Files/Intel/Intel(R) Management Engine Components/DAL, mtime 1527726026): 4 files, no impossibilities.
+# C:\Windows (key C:/Windows, mtime 1653904144): 146 files, no impossibilities.
+# C:\ProgramData\Oracle\Java\javapath (key C:/ProgramData/Oracle/Java/javapath 
+, mtime 1650212120): 5 files, no impossibilities.
+# C:\Program Files\Microsoft SQL Server\140\DTS\Binn\ (key C:/Program Files/Microsoft SQL Server/140/DTS/Binn/, mtime 1655428720): 46 files, no impossibilities.
+# C:\Program Files\Intel\Intel(R) Management Engine Components\iCLS\ (key C:/Program Files/Intel/Intel(R) Management Engine Components/iCLS/, mtime 1527726034): 11 files, no impossibilities.
+# C:\Program Files\Intel\WiFi\bin\ (key C:/Program Files/Intel/WiFi/bin/, mtime 1556721699): 37 files, no impo 
+ssibilities.
+# C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\130\Tools\Binn\ (key C:/Program Files/Microsoft SQL Server/Client SDK/ODBC/130/Tools/Binn/, mtime 1655428719): 6 files, no impossibilities.
+# C:\Program Files\Common Files\Intel\WirelessCommon\ (key C:/Program Files/Common Files/Intel/WirelessCommon/, mtime 1556721699): 7 files, no impossibilities.
+# D:\Programs\nodejs\ (key D:/Programs/nodejs/, mtime 1650834542): 7 files, no impossibilities.
+# C:\Program Files\AdoptOpenJDK\jre-11.0.7.10-h 
+otspot\bin (key C:/Program Files/AdoptOpenJDK/jre-11.0.7.10-hotspot/bin, mtime 1630498554): 99 files, no impossibilities.
+# C:\Users\harry\AppData\Local\gitkraken\bin (key C:/Users/harry/AppData/Local/gitkraken/bin, mtime 1625582424): 3 files, no impossibilities.
+# C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR (key C:/Program Files/NVIDIA Corporation/NVIDIA NvDLISR, mtime 1543227973): 5 files, no impossibilities.
+# C:\adb (key C:/adb, mtime 1539855828): 6 files, no impossibilities.
+# C:\Program Files ( 
+x86)\Microsoft SQL Server\140\Tools\Binn\ManagementStudio\ (key C:/Program Files (x86)/Microsoft SQL Server/140/Tools/Binn/ManagementStudio/, mtime 1547722171): 231 files, no impossibilities.
+# C:\Program Files\JetBrains\CLion 2021.3.4\bin (key C:/Program Files/JetBrains/CLion 2021.3.4/bin, mtime 1649396103): 37 files, no impossibilities.
+# C:\Program Files (x86)\dotnet\ (key C:/Program Files (x86)/dotnet/, mtime 1646836561): 8 files, no impossibilities.
+# D:\Programs\OpenVPN\bin (key D:/Programs/OpenVPN/bi 
+n, mtime 1650834546): 11 files, no impossibilities.
+# D:\Programs\PuTTY\ (key D:/Programs/PuTTY/, mtime 1650834548): 12 files, no impossibilities.
+# C:\Program Files\Git\cmd (key C:/Program Files/Git/cmd, mtime 1640038218): 7 files, no impossibilities.
+# C:\Windows\system32 (key C:/Windows/system32, mtime 1658599300): 3257 files, no impossibilities.
+# D:\Programs\Microsoft VS Code\bin (key D:/Programs/Microsoft VS Code/bin, mtime 1650834380): 4 files, no impossibilities.
+# D:\Programs\GnuWin32\bin (key D:/P 
+rograms/GnuWin32/bin, mtime 1657966446): 11 files, no impossibilities.
+# C:\Program Files\Java\jdk1.8.0_181\bin (key C:/Program Files/Java/jdk1.8.0_181/bin, mtime 1535887672): 56 files, no impossibilities.
+# C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\IPT (key C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/IPT, mtime 1527726026): 6 files, no impossibilities.
+# C:\ProgramData\ComposerSetup\bin (key C:/ProgramData/ComposerSetup/bin, mtime 1560107133): 5 files, no imp 
+ossibilities.
+# C:\Program Files\Microsoft SQL Server\130\Tools\Binn\ (key C:/Program Files/Microsoft SQL Server/130/Tools/Binn/, mtime 1535886108): 4 files, no impossibilities.
+# C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL (key C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/DAL, mtime 1527726026): 10 files, no impossibilities.
+# C:\Program Files (x86)\GnuWin32\bin (key C:/Program Files (x86)/GnuWin32/bin, mtime 1623232319): 5 files, no impossibilities.
+
+# 4843 
+ files, no impossibilities in 68 directories.
 
 # Implicit Rules
 
@@ -232,8 +334,7 @@ scanner.l:
 #  Modification time never checked.
 #  File has not been updated.
 
-# Not a target 
-:
+# Not a target:
 all:
 #  Command-line target.
 #  Implicit rule search has been done.
@@ -243,39 +344,55 @@ all:
 # Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 
 # Not a target:
+input.txt:
+#  Implicit rule search has not been 
+ done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
 .DEFAULT:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
 
-output.c: interpreter.exe
+output.c: interpreter.exe input.txt
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  commands to execute (from `makefile', line 2):
+#  commands to execute (from `makefile', line 5):
 	type .\input.txt | .\interpreter.exe
 	
 
 parser.tab.c: parser.y
 #  Implicit rule search has not been done.
+ 
 #  Modification time never checked.
 #  File has not been updated.
-#  commands to execute (from `makefile', line 11):
+#  commands to execute (from `makefile', line 14):
 	bison -d parser.y
 	
 
 # Not a target:
 makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-07-24 11:17:24
+#  Last modified 2022-07-24 19:02:01
 #  File has been updated.
 #  Successfully updated.
 # variable set hash-table stats:
 # Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 
+program.exe: output.c
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  commands 
+ to execute (from `makefile', line 2):
+	gcc .\output.c -o program.exe
+	
+
 # Not a target:
-.SUFFIXE 
-S:
+.SUFFIXES:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -284,21 +401,22 @@ lex.yy.c: parser.tab.c scanner.l
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  commands to execute (from `makefile', line 8):
+#  commands to execute (from `makefile', line 11):
 	flex scanner.l
 	
 
 # Not a target:
 parser.y:
 #  Implicit rule search has not been done.
-#  Modification time never checked.
+#  Modification time  
+never checked.
 #  File has not been updated.
 
 clean:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  commands to execute (from `makefile', line 14):
+#  commands to execute (from `makefile', line 17):
 	del lex.yy.c parser.tab.c parser.tab.h interpreter.exe output.c
 	
 
@@ -306,12 +424,12 @@ interpreter.exe: lex.yy.c parser.tab.c
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  commands to execute (from `makefile', line 5):
-	gcc lex.yy.c parser.tab.c symbol_table.c stack.c -o interpreter.exe
+#  commands to execute (from `makefile', line 8):
+	gcc -Wl,--stack,16777216 lex.yy.c parser.tab.c symbol_table.c stack.c -o interpreter.exe
 	
 
 # files hash-table stats:
-# Load=11/1024=1%, Rehash=0, Collisions=0/28=0%
+# Load=13/1024=1%, Rehash=0, Collisions=0/32=0%
 # VPATH Search Paths
 
 # No `vpath' search paths.
@@ -323,7 +441,7 @@ interpreter.exe: lex.yy.c parser.tab.c
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Sun Jul 24 11:17:34 2022
+# Finished Make data base on Sun Jul 24 19:17:15 2022
 
  
 make.exe: *** No rule to make target `all'.  Stop.

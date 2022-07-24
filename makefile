@@ -5,7 +5,7 @@ output.c: interpreter.exe input.txt
 	type .\input.txt | .\interpreter.exe
 
 interpreter.exe: lex.yy.c parser.tab.c
-	gcc lex.yy.c parser.tab.c symbol_table.c stack.c -o interpreter.exe
+	gcc -Wl,--stack,16777216 lex.yy.c parser.tab.c symbol_table.c stack.c -o interpreter.exe
 
 lex.yy.c: parser.tab.c scanner.l
 	flex scanner.l

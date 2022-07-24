@@ -77,14 +77,8 @@ int main() {
 	int *ls = NULL;
 	int lts = 0;
 
-	int* fib = NULL;
-	lts++;
-	ts = realloc(ts, sizeof(int*) * lts);
-	ls = realloc(ls, sizeof(int) * lts);
-	ls[lts - 1] = 16;
-	ts[lts - 1] = malloc(sizeof(int)*ls[lts-1]);
-	memcpy(ts[lts - 1], (int[]){0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610}, sizeof(int) * ls[lts - 1]);
-	fib = realloc(fib, sizeof(int) * ls[lts - 1]);
-	for(int i = 0; i < ls[lts - 1]; i++) {
-		fib[i] = ts[lts - 1][i];
-	}
+	int x;
+
+	free(ls);
+	free(ts);
+}
