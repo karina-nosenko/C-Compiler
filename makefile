@@ -14,4 +14,4 @@ parser.tab.c: parser.y
 	bison -d parser.y
 
 clean: 
-	del lex.yy.c parser.tab.c parser.tab.h interpreter.exe output.c
+	del lex.yy.c parser.tab.c parser.tab.h interpreter.exe
