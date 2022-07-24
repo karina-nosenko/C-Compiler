@@ -2,7 +2,7 @@ program.exe: output.c
 	gcc .\output.c -o program.exe
 
 output.c: interpreter.exe
-	type .\input.txt | .\interpreter.exe
+	type .\input.al | .\interpreter.exe
 
 interpreter.exe: lex.yy.c parser.tab.c
 	gcc lex.yy.c parser.tab.c symbol_table.c stack.c -o interpreter.exe

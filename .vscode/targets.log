@@ -8,7 +8,7 @@ make.exe all --print-data-base --no-builtin-variables --no-builtin-rules --quest
 # This program built for i386-pc-mingw32
  
 
-# Make data base, printed on Sun Jul 24 09:26:45 2022
+# Make data base, printed on Sun Jul 24 09:32:28 2022
 
 # Variables
 
@@ -33,8 +33,7 @@ CURDIR := c:/Users/karina/OneDrive/Desktop/Shenkar/3year2sem/Compilation/Compile
 # default
 SHELL := sh.exe
 # environment
-WIND 
-IR = C:\Windows
+WINDIR = C:\Windows
 # environment
 VSCODE_NLS_CONFIG = {"locale":"en-us","availableLanguages":{},"_languagePackSupport":true}
 # environment
@@ -84,6 +83,7 @@ PROGRAMFILES = C:\Program Files (x86)
 # environment
 DRIVERDATA = C:\Windows\System32\Drivers\DriverData
 # environment
+ 
 ORIGINAL_XDG_CURRENT_DESKTOP = undefined
 # environment
 USERNAME = karin
@@ -160,8 +160,7 @@ __COMPAT_LAYER = DetectorsAppHealth
 # environment
 TEMP = C:\Users\karina\AppData\Local\Temp
 # environment
-COMSPEC = C:\Windows\system32\cmd. 
-exe
+COMSPEC = C:\Windows\system32\cmd.exe
 # default
 MAKEFILES := 
 # automatic
@@ -203,14 +202,14 @@ USERDOMAIN_ROAMINGPROFILE = MSI
 # C:\Program Files\Common Files\Oracle\Java\javapath (key C:/Program Files/Common Files/Oracle/Java/javapath, mtime 1657194705): 6 files, no impossibilities.
 # C:\Windows\System32\WindowsPowerShell\v1.0\ (key C:/Windows/System32/WindowsPowerShell/v1.0/, mtime 1657284870): 30 files, no impossibilities.
 # C:\Windows\System32\Wbem (key C:/Windows/System32/Wbem, mtime 1657285180): 171 files, no impossibilities.
-# . (key c:/Users/karina/OneDrive/Desktop/Shenkar/3year2sem/Compilation/Compiler/Test1 - Copy, mtime 1658643983): 19 files, no impossibilities.
+# . (key c:/Users/karina/OneDrive/Desktop/Shenkar/3year2sem/Compilation/Compiler/Test1 - Copy, mtime 1658644308): 19 files, no impossibilities.
 # C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common (key C:/Program Files (x86)/NVIDIA Corporation/PhysX/Common, mtime 1641907477): 10 files, no impossibilities.
-# C:\Users\karina\AppData\Local\Programs\Microsoft VS Code\bin (key C:/Users/karina/AppData/Local/Programs/Microsoft VS Code/bin, mtime 1657651695): 4 f 
-iles, no impossibilities.
+# C:\Users\karina\AppData\Local\Programs\Microsoft VS Code\bin (key C:/Users/karina/AppData/Local/Programs/Microsoft VS Code/bin, mtime 1657651695): 4 files, no impossibilities.
 # C:\Program Files\JetBrains\PyCharm Community Edition 2022.1.3\bin (key C:/Program Files/JetBrains/PyCharm Community Edition 2022.1.3/bin, mtime 1657210082): 28 files, no impossibilities.
 # C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.1.3\bin (key C:/Program Files/JetBrains/IntelliJ IDEA Community Edition 2022.1.3/bin, mtime 1657193610): 31 files, no impossibilities.
 # C:\MinGW\bin (key C:/MinGW/bin, mtime 1634524516): 61 files, no impossibilities.
-# C:\Windows\System32\OpenSSH\: could not be stat'd.
+# C:\Windows\ 
+System32\OpenSSH\: could not be stat'd.
 # C:\Windows (key C:/Windows, mtime 1657784820): 119 files, no impossibilities.
 # C:\Users\karina\AppData\Local\Microsoft\WindowsApps (key C:/Users/karina/AppData/Local/Microsoft/WindowsApps, mtime 1658567571): 27 files, no impossibilities.
 # C:\Program Files\Git\cmd (key C:/Program Files/Git/cmd, mtime 1657654240): 8 files, no impossibilities.
@@ -252,7 +251,7 @@ output.c: interpreter.exe
 #  Modification time never checked.
 #  File has not been updated.
 #  commands to execute (from `makefile', line 5):
-	type .\input.txt | .\interpreter.exe
+	type .\input.al | .\interpreter.exe
 	
 
 parser.tab.c: parser.y
@@ -266,16 +265,13 @@ parser.tab.c: parser.y
 # Not a target:
 makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-07-24 09:26:09
+#  Last modified 2022-07-24 09:32:05
 #  File has been updated.
 #  Successfully updated.
 # variable set hash-table stats:
 # Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 
-program.exe: output.c 
-make.exe: *** No rule to make target `all'.  Stop.
-
-
+program.exe: output.c
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -313,7 +309,10 @@ clean:
 
 interpreter.exe: lex.yy.c parser.tab.c
 #  Implicit rule search has not been done.
-#  Modification time never checked.
+#  Modification t 
+make.exe: *** No rule to make target `all'.  Stop.
+
+ime never checked.
 #  File has not been updated.
 #  commands to execute (from `makefile', line 8):
 	gcc lex.yy.c parser.tab.c symbol_table.c stack.c -o interpreter.exe
@@ -332,6 +331,6 @@ interpreter.exe: lex.yy.c parser.tab.c
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Sun Jul 24 09:26:45 2022
+# Finished Make data base on Sun Jul 24 09:32:28 2022
 
  

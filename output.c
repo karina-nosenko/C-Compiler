@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>
+
 int add_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {
 	int i, min, max;
 	min = (len1 < len2) ? len1 : len2;
@@ -14,6 +15,7 @@ int add_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {
 	}
 	return max;
 }
+
 int sub_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {
 	int i, min, max;
 	min = (len1 < len2) ? len1 : len2;
@@ -27,6 +29,7 @@ int sub_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {
 	}
 	return max;
 }
+
 int mul_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {
 	int i, min, max;
 	min = (len1 < len2) ? len1 : len2;
@@ -40,6 +43,7 @@ int mul_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {
 	}
 	return max;
 }
+
 int div_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {
 	int i, min, max;
 	min = (len1 < len2) ? len1 : len2;
@@ -53,6 +57,7 @@ int div_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {
 	}
 	return max;
 }
+
 int dot_product_arrays(int *arr1, int len1, int *arr2, int len2) {
 	int sum = 0;
 	for(int i = 0; i < ((len1 < len2) ? len1 : len2); i++) {
@@ -65,6 +70,7 @@ int main() {
 	int **ts = NULL;
 	int *ls = NULL;
 	int lts = 0;
+
 	int* a = NULL;
 	int* b = NULL;
 	int n;

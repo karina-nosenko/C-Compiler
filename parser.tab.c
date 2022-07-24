@@ -1863,8 +1863,6 @@ void error(char* s) {
     yyerror(NULL, s);
 }
 
-/////////////
-
 bool isInteger(char token[TOKEN_LEN]) {
     for(int i = (token[0] == '-'); i < TOKEN_LEN && token[i] != '\0'; i++) {
         if (!isdigit(token[i])) {
@@ -1877,7 +1875,7 @@ bool isInteger(char token[TOKEN_LEN]) {
 bool isConstArray(char token[TOKEN_LEN]) {
     return (token[0] == '[' && token[strnlen_s(token, TOKEN_LEN) - 1] == ']');
 }
-//TODO
+
 int getConstArrSize(char array[TOKEN_LEN]) {
     int elementCount = 0;
     bool began = false;
@@ -1935,7 +1933,6 @@ void declare(char (*type)[4], char var_name[TOKEN_LEN]) {
     var.type = isInt;
     var.arr_size = isInt;
 
-    // add var to table
     insert(NULL, var);
 }
 
@@ -1944,7 +1941,7 @@ void declare(char (*type)[4], char var_name[TOKEN_LEN]) {
 void begin_program() {
     fprintf(fp, "#include <stdio.h>\n");
     fprintf(fp, "#include <malloc.h>\n");
-    fprintf(fp, "#include <string.h>\n");
+    fprintf(fp, "#include <string.h>\n\n");
     
     tab_print(1);
     fprintf(fp, "int add_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
@@ -1971,7 +1968,7 @@ void begin_program() {
     tab_print(0);
     fprintf(fp, "return max;\n");
     tab_print(-1);
-    fprintf(fp, "}\n");
+    fprintf(fp, "}\n\n");
 
     tab_print(1);
     fprintf(fp, "int sub_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
@@ -1998,7 +1995,7 @@ void begin_program() {
     tab_print(0);
     fprintf(fp, "return max;\n");
     tab_print(-1);
-    fprintf(fp, "}\n");
+    fprintf(fp, "}\n\n");
 
     tab_print(1);
     fprintf(fp, "int mul_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
@@ -2025,7 +2022,7 @@ void begin_program() {
     tab_print(0);
     fprintf(fp, "return max;\n");
     tab_print(-1);
-    fprintf(fp, "}\n");
+    fprintf(fp, "}\n\n");
 
     tab_print(1);
     fprintf(fp, "int div_arrays(int *arr1, int len1, int *arr2, int len2, int** total) {\n");
@@ -2052,7 +2049,7 @@ void begin_program() {
     tab_print(0);
     fprintf(fp, "return max;\n");
     tab_print(-1);
-    fprintf(fp, "}\n");
+    fprintf(fp, "}\n\n");
     
     tab_print(1);
     fprintf(fp, "int dot_product_arrays(int *arr1, int len1, int *arr2, int len2) {\n");
@@ -2077,7 +2074,7 @@ void begin_program() {
     tab_print(0);
     fprintf(fp, "int *ls = NULL;\n");
     tab_print(0);
-    fprintf(fp, "int lts = 0;\n");
+    fprintf(fp, "int lts = 0;\n\n");
 }
 
 void begin_block() {
