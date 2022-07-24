@@ -5,6 +5,7 @@ The next tools should be installed to successfully compile this project
 * bison
 * flex
 * make
+* Windows environment
 
 ## Usage
 1) Edit the <b>input.txt</b> file with a syntax of "Another Language" or leave the default example<br>
