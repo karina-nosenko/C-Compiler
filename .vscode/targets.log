@@ -8,7 +8,7 @@ make.exe all --print-data-base --no-builtin-variables --no-builtin-rules --quest
 # This program built for i386-pc-mingw32
  
 
-# Make data base, printed on Sat Jul 16 00:45:11 2022
+# Make data base, printed on Sun Jul 24 07:56:56 2022
 
 # Variables
 
@@ -16,8 +16,6 @@ make.exe all --print-data-base --no-builtin-variables --no-builtin-rules --quest
 <D = $(patsubst %/,%,$(dir $<))
 # automatic
 ?F = $(notdir $?)
-# environment
-ELECTRON_NO_ATTACH_CONSOLE = 1
 # makefile
 MAKEFLAGS = Rrqp
 # automatic
@@ -35,7 +33,8 @@ CURDIR := c:/Users/karina/OneDrive/Desktop/Shenkar/3year2sem/Compilation/Compile
 # default
 SHELL := sh.exe
 # environment
-WINDIR = C:\Windows
+WIND 
+IR = C:\Windows
 # environment
 VSCODE_NLS_CONFIG = {"locale":"en-us","availableLanguages":{},"_languagePackSupport":true}
 # environment
@@ -55,10 +54,9 @@ PROGRAMW6432 = C:\Program Files
 # environment
 PROGRAMDATA = C:\ProgramData
 # environment
-VSCODE_CWD = C:\Users\karina
+VSCODE_CWD = C:\Users\karina\AppData\Local\Programs\Microsoft VS Code
 # environment
-PATH = C:\Program Files\Common Files\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVID 
-IA NvDLISR;C:\Program Files (x86)\GnuWin32\bin;C:\MinGW\bin;C:\Program Files\Git\cmd;C:\Users\karina\AppData\Local\Microsoft\WindowsApps;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.1.3\bin;;C:\Users\karina\AppData\Local\Programs\Microsoft VS Code\bin;C:\Program Files\JetBrains\PyCharm Community Edition 2022.1.3\bin;;C:\MinGW\bin;
+PATH = C:\Program Files\Common Files\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files (x86)\GnuWin32\bin;C:\MinGW\bin;C:\Program Files\Git\cmd;C:\Users\karina\AppData\Local\Microsoft\WindowsApps;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.1.3\bin;;C:\Users\karina\AppData\Local\Programs\Microsoft VS Code\bin;C:\Program Files\JetBrains\PyCharm Community Edition 2022.1.3\bin;;C:\MinGW\bin;
 # environment
 COMMONPROGRAMW6432 = C:\Program Files\Common Files
 # environment
@@ -78,7 +76,7 @@ ELECTRON_RUN_AS_NODE = 1
 # automatic
 %F = $(notdir $%)
 # environment
-CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_4012_BGNQGERWJXZBIFJV
+CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_21736_WPXTDGEIZMSYMXFB
 # environment
 COMPUTERNAME = MSI
 # environment
@@ -86,6 +84,7 @@ PROGRAMFILES = C:\Program Files (x86)
 # environment
 DRIVERDATA = C:\Windows\System32\Drivers\DriverData
 # environment
+ 
 ORIGINAL_XDG_CURRENT_DESKTOP = undefined
 # environment
 USERNAME = karin
@@ -93,8 +92,6 @@ USERNAME = karin
 PUBLIC = C:\Users\Public
 # environment
 VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
-# environment
-VSCODE_CLI = 1
 # environment
 VSCODE_CODE_CACHE_PATH = C:\Users\karina\AppData\Roaming\Code\CachedData\b06ae3b2d2dbfe28bca3134cc6be65935cdfea6a
 # environment
@@ -124,7 +121,8 @@ PROGRAMFILES(X86) = C:\Program Files (x86)
 # automatic
 %D = $(patsubst %/,%,$(dir $%))
 # environment
-LOCALAPPDATA = C:\Users\karina\AppData\Local
+LOCALAPPDATA = C:\Users 
+\karina\AppData\Local
 # environment
 PSMODULEPATH = C:\Program Files\WindowsPowerShell\Modules;C:\Windows\system32\WindowsPowerShell\v1.0\Modules
 # default
@@ -160,6 +158,8 @@ SYSTEMROOT = C:\Windows
 # environment
 APPDATA = C:\Users\karina\AppData\Roaming
 # environment
+__COMPAT_LAYER = DetectorsAppHealth
+# environment
 TEMP = C:\Users\karina\AppData\Local\Temp
 # environment
 COMSPEC = C:\Windows\system32\cmd.exe
@@ -188,11 +188,12 @@ LANG = C
 # environment
 PROCESSOR_LEVEL = 6
 # environment
-VSCODE_PID = 4012
+VSCODE_PID = 21736
 # environment
 USERDOMAIN_ROAMINGPROFILE = MSI
 # variable set hash-table stats:
-# Load=89/1024=9%, Rehash=0, Collisions=9/109=8%
+# Load=88/10 
+24=9%, Rehash=0, Collisions=9/108=8%
 
 # Pattern-specific Variable Values
 
@@ -204,22 +205,23 @@ USERDOMAIN_ROAMINGPROFILE = MSI
 # C:\Program Files\Common Files\Oracle\Java\javapath (key C:/Program Files/Common Files/Oracle/Java/javapath, mtime 1657194705): 6 files, no impossibilities.
 # C:\Windows\System32\WindowsPowerShell\v1.0\ (key C:/Windows/System32/WindowsPowerShell/v1.0/, mtime 1657284870): 30 files, no impossibilities.
 # C:\Windows\System32\Wbem (key C:/Windows/System32/Wbem, mtime 1657285180): 171 files, no impossibilities.
-# . (key c:/Users/karina/OneDrive/Desktop/Shenkar/3year2sem/Compilation/Compiler/Test1 - Copy, mtime 1657910205): 14 files, no impossibilities.
+# . (key c:/Users/karina/OneDrive/Desktop/Shenkar/3year2sem/Compilation/Compiler/Test1 - Copy, mtime 1657996706): 10 files, no impossibilities.
 # C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common (key C:/Program Files (x86)/NVIDIA Corporation/PhysX/Common, mtime 1641907477): 10 files, no impossibilities.
-# C:\Users\karina\AppData\Local\Programs\Microsoft VS Code\bin (key C:/Users/karina/AppData/Local/Programs/Microsoft VS Code/bin, mtime 1657651695): 4 files, no impossibilities.
+# C:\Users\karina\AppData\Local\Programs\Microsoft VS Code\bin (key C:/Users/karina/AppData/Local/Programs/Microsoft VS Code/bin, mtime 1657651695): 
+ 4 files, no impossibilities.
 # C:\Program Files\JetBrains\PyCharm Community Edition 2022.1.3\bin (key C:/Program Files/JetBrains/PyCharm Community Edition 2022.1.3/bin, mtime 1657210082): 28 files, no impossibilities.
 # C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.1.3\bin (key C:/Program Files/JetBrains/IntelliJ IDEA Community Edition 2022.1.3/bin, mtime 1657193610): 31 files, no impossibilities.
 # C:\MinGW\bin (key C:/MinGW/bin, mtime 1634524516): 61 files, no impossibilities.
-# C:\Windows\System32\OpenSS 
-H\: could not be stat'd.
+# C:\Windows\System32\OpenSSH\: could not be stat'd.
 # C:\Windows (key C:/Windows, mtime 1657784820): 119 files, no impossibilities.
-# C:\Users\karina\AppData\Local\Microsoft\WindowsApps (key C:/Users/karina/AppData/Local/Microsoft/WindowsApps, mtime 1657798314): 27 files, no impossibilities.
+# C:\Users\karina\AppData\Local\Microsoft\WindowsApps (key C:/Users/karina/AppData/Local/Microsoft/WindowsApps, mtime 1658567571): 27 files, no impossibilities.
 # C:\Program Files\Git\cmd (key C:/Program Files/Git/cmd, mtime 1657654240): 8 files, no impossibilities.
 # C:\Windows\system32 (key C:/Windows/system32, mtime 1657914715): 2859 files, no impossibilities.
-# C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR (key C:/Program Files/NVIDIA Corporation/NVIDIA NvDLISR, mtime 1641907515): 5 files, no impossibilities.
+# C:\Program Files\NVI 
+DIA Corporation\NVIDIA NvDLISR (key C:/Program Files/NVIDIA Corporation/NVIDIA NvDLISR, mtime 1641907515): 5 files, no impossibilities.
 # C:\Program Files (x86)\GnuWin32\bin (key C:/Program Files (x86)/GnuWin32/bin, mtime 1657475382): 12 files, no impossibilities.
 
-# 3385 files, no impossibilities in 17 directories.
+# 3381 files, no impossibilities in 17 directories.
 
 # Implicit Rules
 
@@ -273,7 +275,8 @@ makefile:
 
 lex.yy.c: parser.tab.c scanner.l
 #  Implicit rule search has not been done.
-#  Modification time never checked.
+#  Modification time never chec 
+ked.
 #  File has not been updated.
 #  commands to execute (from `makefile', line 5):
 	flex scanner.l
@@ -312,11 +315,10 @@ interpreter.exe: lex.yy.c parser.tab.c
 # # of strings in strcache: 1
 # # of strcache buffers: 1
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
-# strcache free: total = 4087 / ma 
-make.exe: *** No rule to make target `all'.  Stop.
+# strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-x = 4087 / min = 4087 / avg = 4087
-
-# Finished Make data base on Sat Jul 16 00:45:11 2022
+# Finished Make data base on Sun Jul 24 07:56:56 2022
 
  
+make.exe: *** No rule to make target `all'.  Stop.
+
