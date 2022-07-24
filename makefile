@@ -1,11 +1,11 @@
 program.exe: output.c
-	gcc .\output.c -o program.exe
+	gcc -Wl,--stack,4294967296 .\output.c -o program.exe
 
 output.c: interpreter.exe input.txt
 	type .\input.txt | .\interpreter.exe
 
 interpreter.exe: lex.yy.c parser.tab.c
-	gcc -Wl,--stack,16777216 lex.yy.c parser.tab.c symbol_table.c stack.c -o interpreter.exe
+	gcc -Wl,--stack,4294967296 lex.yy.c parser.tab.c symbol_table.c stack.c -o interpreter.exe
 
 lex.yy.c: parser.tab.c scanner.l
 	flex scanner.l

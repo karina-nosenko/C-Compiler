@@ -9,9 +9,9 @@
 
     #define TYPE_LEN 4
     #define LABEL_LEN 100
-    #define TOKEN_LEN 100
-    
-    //#define dbg
+    #define TOKEN_LEN 100000
+    #define YYINITDEPTH 10000
+    #define dbg
     #ifdef dbg
     #define YYDEBUG 1
     #define YYERROR_VERBOSE
@@ -19,7 +19,7 @@
     #endif
 
     extern int yylex();
-
+    void error(char* s);
     void yyerror(char (*type)[TYPE_LEN], char* s);
     TokenType assert_var_status(char var_name[TOKEN_LEN], bool required);
     void combine_numbers();
@@ -36,6 +36,7 @@
     void codegen_arithmetic();
     void codegen_dotproduct();
     void codegen_const_arr();
+    void codegen_index();
     void codegen_if();
     void codegen_while();
     void codegen_free();
@@ -86,12 +87,13 @@ declarator          : TYPE { strcpy(*type,yytext); } variable_list
                     ;
 
 assignment          : variable_declared ASSIGN expression { codegen_assign(); }
+                    | index ASSIGN expression { codegen_assign(); }
                     ;
 
-conditional         : IF_COND cond IF_BLOCK { codegen_if(); } block
+conditional         : IF_COND PAR_BEGIN cond PAR_END IF_BLOCK { codegen_if(); } block
                     ;
 
-loop                : LOOP_COND cond LOOP_BLOCK { codegen_while(); } block
+loop                : LOOP_COND PAR_BEGIN cond PAR_END LOOP_BLOCK { codegen_while(); } block
                     ;
 
 print               : PRINT expression_list { codegen_print(); }
@@ -115,9 +117,13 @@ expression          : expression OP { push(NULL, yytext, OPERATOR); } expression
                     | expression DOT_OP expression { codegen_dotproduct(); }
                     | PAR_BEGIN { push(NULL, yytext, OPERATOR); } expression PAR_END { push(NULL, yytext, OPERATOR); codegen_arithmetic(); }
                     | variable_declared
+                    | index
                     | const_arr { codegen_const_arr(); }
                     | number
                     ;      
+
+index               : variable_declared INDEX PAR_BEGIN expression PAR_END { codegen_index(); }
+                    ;
 
 cond                : expression REL_OP { push(NULL, yytext, REL_OPERATOR); } expression { codegen_arithmetic(); }
                     ;
@@ -139,7 +145,7 @@ int main(void) {
     char type[TYPE_LEN];
 
     fp = fopen("output.c", "w");
-    printf("size: %d", sizeof(Table));
+
     char zero[TOKEN_LEN];
     sprintf(zero, "%d", 0);
 
@@ -417,7 +423,7 @@ void codegen_declare(char (*type)[TYPE_LEN], char var_name[TOKEN_LEN]) {
     if (strcmp(*type, "arr") == 0) {
         fprintf(fp, "int* %s = NULL;\n", yytext);
     } else {
-        fprintf(fp, "int %s;\n", yytext);
+        fprintf(fp, "int %s = 0;\n", yytext);
     }
 }
 
@@ -430,11 +436,11 @@ void codegen_assign() {
         fprintf(fp, "%s = %s;\n", var_name.token, exp.token);
     } else {
         tab_print(0);
-        fprintf(fp, "%s = realloc(%s, sizeof(int) * ls[lts - 1]);\n", var_name.token, var_name.token);
+        fprintf(fp, "%s = realloc(%s, sizeof(int) * ls[%d]);\n", var_name.token, var_name.token, lts - 1);
         tab_print(1);
-        fprintf(fp, "for(int i = 0; i < ls[lts - 1]; i++) {\n");
+        fprintf(fp, "for(int i = 0; i < ls[%d]; i++) {\n", lts - 1);
         tab_print(0);
-        fprintf(fp, "%s[i] = ts[lts - 1][i];\n", var_name.token);
+        fprintf(fp, "%s[i] = ts[%d][i];\n", var_name.token, lts - 1);
         tab_print(-1);
         fprintf(fp, "}\n");
         update(NULL, var_name.token, ls_last);
@@ -466,11 +472,16 @@ void codegen_arithmetic() {
         tab_print(0);
         fprintf(fp, "ls = realloc(ls, sizeof(int) * lts);\n");
         tab_print(0);
-        fprintf(fp, "ls[lts - 1] = 1;\n");
+        fprintf(fp, "ls[%d] = 1;\n", lts);
         tab_print(0);
-        fprintf(fp, "ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);\n");
+        fprintf(fp, "ts[%d] = malloc(sizeof(int) * ls[%d]);\n", lts, lts);
         tab_print(0);
-        fprintf(fp, "ts[lts - 1][0] = %s %s %s;\n", m1.token, m2.token, m3.token);
+        fprintf(fp, "ts[%d][0] = %s %s %s;\n", lts, m1.token, m2.token, m3.token);
+        Variable var;
+        sprintf(var.id, "ts[%d]", lts);
+        var.type = INT;
+        strcpy(var.arr_size, ls_last);
+        insert(NULL, var);
         sprintf(expVal, "ts[%d][0]", lts++);
         }
         push(NULL, expVal, INT);
@@ -518,7 +529,7 @@ void codegen_arithmetic() {
         tab_print(0);
         fprintf(fp, "ls = realloc(ls, sizeof(int) * lts);\n");
         tab_print(0);
-        fprintf(fp, "ls[lts - 1] = %s_arrays(%s, %s, %s, %s, &(ts[lts - 1]));", m2.token, m1.token, l1, m3.token, l3);
+        fprintf(fp, "ls[%d] = %s_arrays(%s, %s, %s, %s, &(ts[%d]));", lts, m2.token, m1.token, l1, m3.token, l3, lts);
         sprintf(ls_last, "((%s > %s) ? %s : %s)",l1, l3, l1, l3);
         Variable var;
         sprintf(var.id, "ts[%d]", lts);
@@ -574,11 +585,11 @@ void codegen_dotproduct() {
     tab_print(0);
     fprintf(fp, "ls = realloc(ls, sizeof(int) * lts);\n");
     tab_print(0);
-    fprintf(fp, "ls[lts - 1] = 1;\n");
+    fprintf(fp, "ls[%d] = 1;\n", lts);
     tab_print(0);
-    fprintf(fp, "ts[lts - 1] = malloc(sizeof(int) * ls[lts - 1]);\n");
+    fprintf(fp, "ts[%d] = malloc(sizeof(int) * ls[%d]);\n", lts, lts);
     tab_print(0);
-    fprintf(fp, "*ts[lts - 1] = dot_product_arrays(%s, %s, %s, %s);\n", m1.token, l1, m3.token, l3);
+    fprintf(fp, "*ts[%d] = dot_product_arrays(%s, %s, %s, %s);\n", lts, m1.token, l1, m3.token, l3);
     Variable var;
     sprintf(var.id, "ts[%d]", lts);
     var.type = INTEGER;
@@ -610,14 +621,35 @@ void codegen_const_arr() {
     tab_print(0);
     fprintf(fp, "ls = realloc(ls, sizeof(int) * lts);\n");
     tab_print(0);
-    fprintf(fp, "ls[lts - 1] = %s;\n", var.arr_size);
+    fprintf(fp, "ls[%d] = %s;\n", lts, var.arr_size);
     tab_print(0);
-    fprintf(fp, "ts[lts - 1] = malloc(sizeof(int)*ls[lts-1]);\n");
+    fprintf(fp, "ts[%d] = malloc(sizeof(int)*ls[lts-1]);\n", lts);
     tab_print(0);
-    fprintf(fp, "memcpy(ts[lts - 1], (int[]){%s}, sizeof(int) * ls[lts - 1]);\n", temp);
+    fprintf(fp, "memcpy(ts[%d], (int[]){%s}, sizeof(int) * ls[%d]);\n", lts, temp, lts);
     sprintf(m.token, "ts[%d]", lts++);
 
     push(NULL, m.token, m.type);
+}
+
+void codegen_index() {
+    char expVal[TOKEN_LEN];
+    StackMember arr, inx;
+    Variable var;
+
+    pop(NULL, &inx);
+    pop(NULL, &arr);
+
+    get(NULL, &var, arr.token, 0);
+    tab_print(1);
+    fprintf(fp, "if((%s) >= (%s)) {\n", inx.token, var.arr_size);
+    tab_print(0);
+    fprintf(fp, "%s = realloc(%s, sizeof(int) * ((%s) + 1));\n", arr.token, arr.token, inx.token);
+    tab_print(-1);
+    fprintf(fp, "}\n");
+    sprintf(expVal, "((((%s) + 1) > ((%s) + 1)) ? (%s) : (%s))", inx.token, var.arr_size, inx.token, var.arr_size);
+    update(NULL, arr.token, expVal);
+    sprintf(expVal, "%s[%s]", arr.token, inx.token);
+    push(NULL, expVal, INT);
 }
 
 void codegen_expList() {
@@ -655,7 +687,7 @@ void codegen_print() {
     tab_print(0);
     fprintf(fp, "printf(\"%c%c", '%', 'd');
     for(int i = 1; i < expListCount; i++) {
-        printf(", %c%c", '%', 'd');
+        fprintf(fp, ", %c%c", '%', 'd');
     }
 
     fprintf(fp, "\\n\", %s);\n", expList.token);
@@ -681,7 +713,7 @@ void codegen_free() {
     Variable var;
     for(int i=0; i < tSize; i++) {
         get(NULL, &var, NULL, i);
-        if (var.type == ARRAY) {
+        if (((var.id[0] == 't') && (var.id[1] == 's')) || var.type == ARRAY) {
             tab_print(0);
             fprintf(fp, "free(%s);\n", var.id);   // free(x)
         }

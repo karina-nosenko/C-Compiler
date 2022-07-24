@@ -1,7 +1,7 @@
 #ifndef SYMBOL_TABLE_H
 #define SYMBOL_TABLE_H
 
-#define TOKEN_LEN 100
+#define TOKEN_LEN 100000
 #define TABLE_SIZE 10000
 
 typedef enum token_type{
