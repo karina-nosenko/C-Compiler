@@ -30,55 +30,55 @@ int size(TablePtr table) {
 }
 
 void insert(TablePtr table, Variable var) {
-    // static TablePtr tablePtr = NULL;
+    static TablePtr tablePtr = NULL;
 
-    // if(table) {
-    //     tablePtr = table;
-    // } else {
-    //     if(find(NULL, var.id) >= 0) {
-    //         char errorMsg[TOKEN_LEN];
-    //         sprintf(errorMsg, "Variable %s already declared.\n", var.id);
-    //         error(errorMsg);
-    //         exit(1);
-    //     }
-    //     if(tablePtr->size == TABLE_SIZE) {
-    //         error("table full.");
-    //         exit(1);
-    //     }
-    //     strcpy(tablePtr->data[tablePtr->size].id, var.id);
-    //     tablePtr->data[tablePtr->size].type = var.type;
-    //     strcpy(tablePtr->data[tablePtr->size].arr_size, var.arr_size);
-    //     tablePtr->size++;
-    // }
+    if(table) {
+        tablePtr = table;
+    } else {
+        if(find(NULL, var.id) >= 0) {
+            char errorMsg[TOKEN_LEN];
+            sprintf(errorMsg, "Variable %s already declared.\n", var.id);
+            error(errorMsg);
+            exit(1);
+        }
+        if(tablePtr->size == TABLE_SIZE) {
+            error("table full.");
+            exit(1);
+        }
+        strcpy(tablePtr->data[tablePtr->size].id, var.id);
+        tablePtr->data[tablePtr->size].type = var.type;
+        strcpy(tablePtr->data[tablePtr->size].arr_size, var.arr_size);
+        tablePtr->size++;
+    }
 }
 
 void get(TablePtr table, VariablePtr var, char id[TOKEN_LEN], int inx) {
-    // static TablePtr tablePtr = NULL;
+    static TablePtr tablePtr = NULL;
 
-    // if(table) {
-    //     tablePtr = table;
-    // } else if(!id) {
-    //     if(inx > tablePtr->size) {
-    //         char errorMsg[TOKEN_LEN];
-    //         sprintf(errorMsg, "index %d out of bounds", inx);
-    //         error(errorMsg);
-    //         exit(1);
-    //     }
-    //     strcpy(var->id, tablePtr->data[inx].id);
-    //     var->type = tablePtr->data[inx].type;
-    //     strcpy(var->arr_size, tablePtr->data[inx].arr_size);
-    // } else {
-    //     int index = find(NULL, id);
-    //     if(index < 0) {
-    //         char errorMsg[TOKEN_LEN];
-    //         sprintf(errorMsg, "Variable %s not declared.\n", id);
-    //         error(errorMsg);
-    //         exit(1);
-    //     }
-    //     strcpy(var->id, tablePtr->data[index].id);
-    //     var->type = tablePtr->data[index].type;
-    //     strcpy(var->arr_size, tablePtr->data[index].arr_size);
-    // }
+    if(table) {
+        tablePtr = table;
+    } else if(!id) {
+        if(inx > tablePtr->size) {
+            char errorMsg[TOKEN_LEN];
+            sprintf(errorMsg, "index %d out of bounds", inx);
+            error(errorMsg);
+            exit(1);
+        }
+        strcpy(var->id, tablePtr->data[inx].id);
+        var->type = tablePtr->data[inx].type;
+        strcpy(var->arr_size, tablePtr->data[inx].arr_size);
+    } else {
+        int index = find(NULL, id);
+        if(index < 0) {
+            char errorMsg[TOKEN_LEN];
+            sprintf(errorMsg, "Variable %s not declared.\n", id);
+            error(errorMsg);
+            exit(1);
+        }
+        strcpy(var->id, tablePtr->data[index].id);
+        var->type = tablePtr->data[index].type;
+        strcpy(var->arr_size, tablePtr->data[index].arr_size);
+    }
 }
 
 void update(TablePtr table, char id[TOKEN_LEN], char new_size[TOKEN_LEN]) {

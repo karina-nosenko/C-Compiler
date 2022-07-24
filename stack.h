@@ -1,7 +1,7 @@
 #ifndef STACK_H
 #define STACK_H
 
-#define TOKEN_LEN 100
+#define TOKEN_LEN 100000
 #define STACK_SIZE 1000
 typedef enum stack_member_type{
     ARR = 0,
