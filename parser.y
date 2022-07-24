@@ -344,7 +344,7 @@ void begin_program() {
     tab_print(1);
     fprintf(fp, "if(len1 > len2) {\n");
     tab_print(0);
-    fprintf(fp, "fprintf(stderr, \"Division of a shorter array by a longer caused a division by zero.\\n\");\n");
+    fprintf(fp, "fprintf(stderr, \"Division by zero: longer array divided by a shorter\\n\");\n");
     tab_print(0);
     fprintf(fp, "exit(1);\n");
     tab_print(-1);
