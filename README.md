@@ -1,11 +1,11 @@
 # Compiler from "Another Language" to C
 
 ## Prerequisites
+The compiler was build and tested at Windows environment.
 The next tools should be installed to successfully compile this project
 * bison
 * flex
 * make
-* Windows environment
 
 ## Usage
 1) Edit the <b>input.txt</b> file with a syntax of "Another Language" or leave the default example<br>
